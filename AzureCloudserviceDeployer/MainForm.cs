@@ -41,6 +41,7 @@ namespace AzureCloudserviceDeployer
         {
             Logger.Debug("HandleMainformShown");
             UpdateFormState();
+            AppVersion.CheckForUpdateAsync();
         }
 
         private void HandleChangelogClicked(object sender, EventArgs e)
