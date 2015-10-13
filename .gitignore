@@ -14,3 +14,6 @@ FastColoredTextBox
 # Exclude obj and bin directories
 **/bin
 **/obj
+
+# Exclude nuget packages
+packages/**
