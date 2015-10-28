@@ -6,6 +6,7 @@ using Microsoft.WindowsAzure.Management.Compute.Models;
 using Microsoft.WindowsAzure.Management.Storage.Models;
 using Microsoft.WindowsAzure.Subscriptions.Models;
 using MsCommon.ClickOnce;
+using MsCommon.ClickOnce.Extensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -104,6 +105,7 @@ namespace AzureCloudserviceDeployer
 
                 // Load cloudservices
                 var hostedservices = await AzureHelper.GetCloudservicesAsync(subscription);
+                //AzureHelper.Test(subscription);
                 cbCloudservices.Items.Clear();
                 foreach (var service in hostedservices.OrderBy(s => s.ServiceName))
                 {
@@ -129,8 +131,11 @@ namespace AzureCloudserviceDeployer
 
                 // Load upgrade preferences
                 cbUpgradePreference.Items.Clear();
-                cbUpgradePreference.Items.Add(UpgradePreference.RemoveCreateDeploymentIfExists);
-                cbUpgradePreference.Items.Add(UpgradePreference.UpgradeIfDeploymentExists);
+                cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.UpgradeWithUpdateDomains, UpgradePreference.UpgradeWithUpdateDomains.GetDescription()));
+                cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.UpgradeSimultaneously, UpgradePreference.UpgradeSimultaneously.GetDescription()));
+                cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.DeleteAndCreateDeployment, UpgradePreference.DeleteAndCreateDeployment.GetDescription()));
+                cbUpgradePreference.ValueMember = "Key";
+                cbUpgradePreference.DisplayMember = "Value";
                 cbUpgradePreference.SelectedIndex = 0;
 
                 // Load diagnostics storage
@@ -144,6 +149,7 @@ namespace AzureCloudserviceDeployer
                 cbDiagStorage.SelectedIndex = 0;
 
                 UpdateFormState();
+                HandleGenerateLabelClicked(this, EventArgs.Empty);
             });
         }
 
@@ -159,6 +165,8 @@ namespace AzureCloudserviceDeployer
             UpdateControlEnabledState(btnBrowseCloudConfig, state);
             UpdateControlEnabledState(btnBrowseDiagnostics, state);
             UpdateControlEnabledState(cbDiagStorage, state);
+            UpdateControlEnabledState(btnGenerateLabel, state);
+            UpdateControlEnabledState(tbLabel, state);
             UpdateControlEnabledState(btnDeploy, state);
         }
 
@@ -191,19 +199,24 @@ namespace AzureCloudserviceDeployer
         private void HandleSelectCloudDiag(object sender, EventArgs e)
         {
             Logger.Debug("HandleSelectCloudDiag");
-            UpdateSelectedFiles(SelectFile("Cloud Diag Config|*.xml|All Files|*.*"));
+            UpdateSelectedFiles(SelectFile("Cloud Diag Config|*.PubConfig.xml|All Files|*.*"));
         }
 
         private void UpdateSelectedFiles(string path)
         {
             Logger.Debug("UpdateSelectedFiles");
+            if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                foreach (var file in Directory.EnumerateFileSystemEntries(path))
+                    UpdateSelectedFiles(file);
+            }
             if (path == null)
                 return;
             if (path.EndsWith(".cspkg", StringComparison.OrdinalIgnoreCase))
                 _selectedPackage = path;
             if (path.EndsWith(".cscfg", StringComparison.OrdinalIgnoreCase))
                 _selectedConfig = path;
-            if (path.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+            if (path.EndsWith(".pubconfig.xml", StringComparison.OrdinalIgnoreCase))
                 _selectedDiag = path;
             lblSelectedPackage.Text = Path.GetFileName(_selectedPackage);
             lblSelectedConfig.Text = Path.GetFileName(_selectedConfig);
@@ -219,12 +232,14 @@ namespace AzureCloudserviceDeployer
                 var service = cbCloudservices.SelectedItem as HostedServiceListResponse.HostedService;
                 var packageStorage = cbPackageStorage.SelectedItem as StorageAccount;
                 var slot = (DeploymentSlot)cbSlot.SelectedItem;
-                var pref = (UpgradePreference)cbUpgradePreference.SelectedItem;
+                var pref = ((KeyValuePair<UpgradePreference,string>)cbUpgradePreference.SelectedItem).Key;
                 var diagstorage = cbDiagStorage.SelectedItem as StorageAccount;
+                var deploymentLabel = tbLabel.Text;
 
                 try
                 {
-
+                    if (subscription == null)
+                        throw new ApplicationException("Subscription must be selectered");
                     if (service == null)
                         throw new ApplicationException("Cloudservice must be selected");
                     if (packageStorage == null)
@@ -236,8 +251,8 @@ namespace AzureCloudserviceDeployer
                     if (_selectedDiag == null)
                         if (MessageBox.Show("Diagnostics configuration is not selected. Are you sure you want to continue?", "Diagnostics Configuration", MessageBoxButtons.YesNo) != DialogResult.Yes)
                             return;
-
-                    await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage);
+                    
+                    await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage, deploymentLabel);
                 }
                 catch (ApplicationException aex)
                 {
@@ -280,6 +295,14 @@ namespace AzureCloudserviceDeployer
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (var file in files)
                 UpdateSelectedFiles(file);
+        }
+
+        private void HandleGenerateLabelClicked(object sender, EventArgs e)
+        {
+            tbLabel.Text = DateTime.UtcNow.ToString("u") + " " + Environment.MachineName + " " + Environment.UserName + " ";
+            if (btnGenerateLabel.ContainsFocus)
+                tbLabel.Focus();
+            tbLabel.Select(tbLabel.Text.Length, 0);
         }
     }
 }

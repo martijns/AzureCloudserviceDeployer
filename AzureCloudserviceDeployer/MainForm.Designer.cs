@@ -67,6 +67,9 @@
             this.lbLog = new System.Windows.Forms.ListBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.tbLabel = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.btnGenerateLabel = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
@@ -178,6 +181,9 @@
             // 
             // gbQuickDeploy
             // 
+            this.gbQuickDeploy.Controls.Add(this.btnGenerateLabel);
+            this.gbQuickDeploy.Controls.Add(this.label11);
+            this.gbQuickDeploy.Controls.Add(this.tbLabel);
             this.gbQuickDeploy.Controls.Add(this.cbDiagStorage);
             this.gbQuickDeploy.Controls.Add(this.label10);
             this.gbQuickDeploy.Controls.Add(this.pictureBox1);
@@ -203,7 +209,7 @@
             this.gbQuickDeploy.Controls.Add(this.cbSubscriptions);
             this.gbQuickDeploy.Location = new System.Drawing.Point(12, 89);
             this.gbQuickDeploy.Name = "gbQuickDeploy";
-            this.gbQuickDeploy.Size = new System.Drawing.Size(613, 340);
+            this.gbQuickDeploy.Size = new System.Drawing.Size(613, 366);
             this.gbQuickDeploy.TabIndex = 4;
             this.gbQuickDeploy.TabStop = false;
             this.gbQuickDeploy.Text = "Quick Deploy";
@@ -241,9 +247,9 @@
             // btnDeploy
             // 
             this.btnDeploy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDeploy.Location = new System.Drawing.Point(113, 273);
+            this.btnDeploy.Location = new System.Drawing.Point(113, 300);
             this.btnDeploy.Name = "btnDeploy";
-            this.btnDeploy.Size = new System.Drawing.Size(203, 52);
+            this.btnDeploy.Size = new System.Drawing.Size(142, 53);
             this.btnDeploy.TabIndex = 19;
             this.btnDeploy.Text = "Deploy";
             this.btnDeploy.UseVisualStyleBackColor = true;
@@ -439,7 +445,7 @@
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.lbLog);
-            this.groupBox3.Location = new System.Drawing.Point(12, 435);
+            this.groupBox3.Location = new System.Drawing.Point(12, 461);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(613, 150);
             this.groupBox3.TabIndex = 6;
@@ -451,12 +457,38 @@
             // 
             this.toolTip1.IsBalloon = true;
             // 
+            // tbLabel
+            // 
+            this.tbLabel.Location = new System.Drawing.Point(207, 274);
+            this.tbLabel.Name = "tbLabel";
+            this.tbLabel.Size = new System.Drawing.Size(400, 20);
+            this.tbLabel.TabIndex = 24;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(9, 277);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(36, 13);
+            this.label11.TabIndex = 25;
+            this.label11.Text = "Label:";
+            // 
+            // btnGenerateLabel
+            // 
+            this.btnGenerateLabel.Location = new System.Drawing.Point(113, 272);
+            this.btnGenerateLabel.Name = "btnGenerateLabel";
+            this.btnGenerateLabel.Size = new System.Drawing.Size(88, 23);
+            this.btnGenerateLabel.TabIndex = 26;
+            this.btnGenerateLabel.Text = "Generate";
+            this.btnGenerateLabel.UseVisualStyleBackColor = true;
+            this.btnGenerateLabel.Click += new System.EventHandler(this.HandleGenerateLabelClicked);
+            // 
             // MainForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(637, 597);
+            this.ClientSize = new System.Drawing.Size(637, 624);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.gbQuickDeploy);
             this.Controls.Add(this.groupBox1);
@@ -523,6 +555,9 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.ComboBox cbDiagStorage;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.TextBox tbLabel;
+        private System.Windows.Forms.Button btnGenerateLabel;
     }
 }
 

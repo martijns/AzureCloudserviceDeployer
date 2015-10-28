@@ -11,6 +11,8 @@ using Microsoft.WindowsAzure.Subscriptions;
 using Microsoft.WindowsAzure.Subscriptions.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -23,8 +25,12 @@ namespace AzureCloudserviceDeployer
 {
     public enum UpgradePreference
     {
-        RemoveCreateDeploymentIfExists = 1,
-        UpgradeIfDeploymentExists = 2
+        [Description("Delete existing deployment, then create a new one")]
+        DeleteAndCreateDeployment = 1,
+        [Description("Upgrade deployment respecting update domains")]
+        UpgradeWithUpdateDomains = 2,
+        [Description("Upgrade deployment with all update domains simultaneously")]
+        UpgradeSimultaneously = 3
     }
 
     public class AzureHelper
@@ -79,7 +85,7 @@ namespace AzureCloudserviceDeployer
 
         public static async Task DeployAsync(SubscriptionListOperationResponse.Subscription subscription, HostedServiceListResponse.HostedService service,
             StorageAccount storage, DeploymentSlot slot, UpgradePreference upgradePreference, string pathToCspkg,
-            string pathToCscfg, string pathToDiagExtensionConfig, StorageAccount diagStorage = null)
+            string pathToCscfg, string pathToDiagExtensionConfig, StorageAccount diagStorage, string deploymentLabel)
         {
             Logger.InfoFormat("Preparing for deployment of {0}...", service.ServiceName);
             var computeClient = new ComputeManagementClient(await GetCredentialsAsync(subscription));
@@ -199,28 +205,27 @@ namespace AzureCloudserviceDeployer
             }
 
             // Create deployment parameters
-            var deploymentLabel = DateTime.UtcNow.ToString("u") + " " + Environment.MachineName + " " + Environment.UserName;
             var deployParams = new DeploymentCreateParameters
             {
                 StartDeployment = true,
                 Name = Guid.NewGuid().ToString("N"),
                 Configuration = csCfg,
                 PackageUri = blobRef.Uri,
-                Label = deploymentLabel,
+                Label = deploymentLabel ?? DateTime.UtcNow.ToString("u") + " " + Environment.UserName,
                 ExtensionConfiguration = extensionConfiguration
             };
             var upgradeParams = new DeploymentUpgradeParameters
             {
                 Configuration = csCfg,
                 PackageUri = blobRef.Uri,
-                Label = deploymentLabel,
+                Label = deploymentLabel ?? DateTime.UtcNow.ToString("u") + " " + Environment.UserName,
                 ExtensionConfiguration = extensionConfiguration,
-                Mode = DeploymentUpgradeMode.Auto
+                Mode = upgradePreference == UpgradePreference.UpgradeSimultaneously ? DeploymentUpgradeMode.Simultaneous : DeploymentUpgradeMode.Auto
             };
 
             switch (upgradePreference)
             {
-                case UpgradePreference.RemoveCreateDeploymentIfExists:
+                case UpgradePreference.DeleteAndCreateDeployment:
                     {
                         // Is there a deployment in this slot?
                         Logger.InfoFormat("Fetching detailed service information...");
@@ -252,7 +257,8 @@ namespace AzureCloudserviceDeployer
                     }
 
                     break;
-                case UpgradePreference.UpgradeIfDeploymentExists:
+                case UpgradePreference.UpgradeWithUpdateDomains:
+                case UpgradePreference.UpgradeSimultaneously:
                     {
                         // Is there a deployment in this slot?
                         Logger.InfoFormat("Fetching detailed service information...");

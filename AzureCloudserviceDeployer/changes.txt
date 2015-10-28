@@ -1,2 +1,7 @@
-﻿2015-10-09:
+﻿2015-10-14:
+- NEW: Added custom label, partly generated.
+- NEW: Added 3rd upgrade preference: all upgrade domains simulataneously
+- CHG: Default upgrade preference changed to upgrade with respect to upgrade domains.
+
+2015-10-09:
 - Initial version
