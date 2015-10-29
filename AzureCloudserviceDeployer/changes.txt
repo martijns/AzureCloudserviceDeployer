@@ -1,4 +1,8 @@
-﻿2015-10-14:
+﻿2015-10-28:
+- NEW: Application icon visible in taskbar.
+- NEW: Create desktop shortcut and changed publisher name so start menu folder name should be Tikkie.
+
+2015-10-14:
 - NEW: Added custom label, partly generated.
 - NEW: Added 3rd upgrade preference: all upgrade domains simulataneously
 - CHG: Default upgrade preference changed to upgrade with respect to upgrade domains.
