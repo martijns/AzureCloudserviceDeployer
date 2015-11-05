@@ -1,4 +1,10 @@
-﻿2015-10-28:
+﻿2015-11-05:
+- FIX: Diagnostics file being dropped now also matches if the file is suffixed by Windows, i.e. xxxx.PubConfig (1).xml
+- FIX: Prevent Report dialog when cancelling authentication
+- FIX: Prevent Report dialog when a cloud deployment error occurs
+- CHG: Warnings and errors are now highlighted in the log window
+
+2015-10-28:
 - NEW: Application icon visible in taskbar.
 - NEW: Create desktop shortcut and changed publisher name so start menu folder name should be Tikkie.
 

@@ -35,6 +35,8 @@ namespace AzureCloudserviceDeployer
         {
             Logger.Debug("MainForm");
             InitializeComponent();
+            lbLog.DrawMode = DrawMode.OwnerDrawFixed;
+            lbLog.DrawItem += HandleDrawLogItem;
             ((Hierarchy)LogManager.GetRepository()).Root.AddAppender(this);
         }
 
@@ -62,7 +64,16 @@ namespace AzureCloudserviceDeployer
             Logger.Debug("HandleAuthenticateClicked");
             await PerformWorkAsync(this, null, async () =>
             {
-                var auth = await AzureHelper.GetAuthentication(null, true);
+                AuthenticationResult auth = null;
+                try
+                {
+                    auth = await AzureHelper.GetAuthentication(null, true);
+                }
+                catch (AdalException aex)
+                {
+                    Logger.Error(aex.Message);
+                    return;
+                }
                 _authenticated = true;
                 lblLoggedInUser.Text = auth.UserInfo.DisplayableId;
                 await UpdateSubscriptions();
@@ -216,7 +227,7 @@ namespace AzureCloudserviceDeployer
                 _selectedPackage = path;
             if (path.EndsWith(".cscfg", StringComparison.OrdinalIgnoreCase))
                 _selectedConfig = path;
-            if (path.EndsWith(".pubconfig.xml", StringComparison.OrdinalIgnoreCase))
+            if (path.IndexOf(".pubconfig", StringComparison.OrdinalIgnoreCase) >= 0 && path.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                 _selectedDiag = path;
             lblSelectedPackage.Text = Path.GetFileName(_selectedPackage);
             lblSelectedConfig.Text = Path.GetFileName(_selectedConfig);
@@ -251,8 +262,15 @@ namespace AzureCloudserviceDeployer
                     if (_selectedDiag == null)
                         if (MessageBox.Show("Diagnostics configuration is not selected. Are you sure you want to continue?", "Diagnostics Configuration", MessageBoxButtons.YesNo) != DialogResult.Yes)
                             return;
-                    
-                    await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage, deploymentLabel);
+
+                    try
+                    {
+                        await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage, deploymentLabel);
+                    }
+                    catch (CloudException cex)
+                    {
+                        Logger.Error(cex.Message);
+                    }
                 }
                 catch (ApplicationException aex)
                 {
@@ -262,28 +280,66 @@ namespace AzureCloudserviceDeployer
             });
         }
 
-        private void AddToLog(string message)
+        #region Logstuff
+
+        private void AddToLog(LogItem logitem)
         {
             if (lbLog.InvokeRequired)
             {
-                lbLog.Invoke((Action<string>)AddToLog, message);
+                lbLog.Invoke((Action<LogItem>)AddToLog, logitem);
                 return;
             }
-            string time = DateTime.Now.ToString("HH:mm:ss");
-            lbLog.Items.Insert(0, time + ": " + message);
+            lbLog.Items.Insert(0, logitem);
             while (lbLog.Items.Count > 250)
             {
                 lbLog.Items.RemoveAt(lbLog.Items.Count - 1);
             }
         }
 
+        private void HandleDrawLogItem(object sender, DrawItemEventArgs e)
+        {
+            ListBox lb = (ListBox)sender;
+            if (e.Index < 0 || e.Index >= lb.Items.Count)
+                return;
+
+            Color backColor = lb.BackColor;
+            LogItem li = lb.Items[e.Index] as LogItem;
+            if (li != null)
+            {
+                if (li.Level == Level.Warn)
+                    backColor = Color.Yellow;
+                if (li.Level == Level.Error)
+                    backColor = Color.Pink;
+            }
+
+            e.DrawBackground();
+            Graphics g = e.Graphics;
+            g.FillRectangle(new SolidBrush(backColor), e.Bounds);
+            g.DrawString(lb.Items[e.Index].ToString(), e.Font, new SolidBrush(Color.Black), new PointF(e.Bounds.X, e.Bounds.Y));
+            e.DrawFocusRectangle();
+        }
+
         public void DoAppend(LoggingEvent loggingEvent)
         {
             if (loggingEvent.Level >= Level.Info)
             {
-                AddToLog(loggingEvent.RenderedMessage);
+                AddToLog(new LogItem { TimeStamp = loggingEvent.TimeStamp, Level = loggingEvent.Level, Message = loggingEvent.RenderedMessage });
             }
         }
+
+        public class LogItem
+        {
+            public DateTime TimeStamp { get; set; }
+            public Level Level { get; set; }
+            public string Message { get; set; }
+
+            public override string ToString()
+            {
+                return string.Format("{0}: {1}", TimeStamp.ToString("HH:mm:ss"), Message);
+            }
+        }
+
+        #endregion
 
         private void HandleDragEnter(object sender, DragEventArgs e)
         {
