@@ -1,4 +1,13 @@
-﻿2015-11-05:
+﻿2015-11-12:
+- FIX: Tooltip will also appear on click, even when form is disabled
+- FIX: Prevent crash when cancelling Browse dialog
+- FIX: Horizontally scroll logmessages if they're too long
+- NEW: Select log messages and copy them to clipboard (rightclick -> copy)
+- NEW: Generate label based on template instead of when clicking Generate button, making it easier to reuse
+- NEW: Verify that the selected package/config/diag still exists on the filesystem before deploying
+- NEW: Added option to skip removing unused extensions
+
+2015-11-05:
 - FIX: Diagnostics file being dropped now also matches if the file is suffixed by Windows, i.e. xxxx.PubConfig (1).xml
 - FIX: Prevent Report dialog when cancelling authentication
 - FIX: Prevent Report dialog when a cloud deployment error occurs

@@ -32,8 +32,11 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionCleanupUnusedExtensionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.changelogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.submitFeedbacknotYetAvailableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnChangeUser = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -41,6 +44,14 @@
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.lblLoggedInUser = new System.Windows.Forms.Label();
             this.gbQuickDeploy = new System.Windows.Forms.GroupBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.lblLabelPreview = new System.Windows.Forms.Label();
+            this.lblPreview = new System.Windows.Forms.Label();
+            this.btnClearDiagConfig = new System.Windows.Forms.Button();
+            this.btnClearCloudConfig = new System.Windows.Forms.Button();
+            this.btnClearCloudPackage = new System.Windows.Forms.Button();
+            this.label11 = new System.Windows.Forms.Label();
+            this.tbLabel = new System.Windows.Forms.TextBox();
             this.cbDiagStorage = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -65,16 +76,17 @@
             this.label2 = new System.Windows.Forms.Label();
             this.cbSubscriptions = new System.Windows.Forms.ComboBox();
             this.lbLog = new System.Windows.Forms.ListBox();
+            this.lbLogContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.tbLabel = new System.Windows.Forms.TextBox();
-            this.label11 = new System.Windows.Forms.Label();
-            this.btnGenerateLabel = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.gbQuickDeploy.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.lbLogContextMenu.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -82,6 +94,7 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
+            this.optionsToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -104,10 +117,28 @@
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.HandleExitClicked);
             // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.optionCleanupUnusedExtensionsToolStripMenuItem});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.optionsToolStripMenuItem.Text = "Options";
+            // 
+            // optionCleanupUnusedExtensionsToolStripMenuItem
+            // 
+            this.optionCleanupUnusedExtensionsToolStripMenuItem.Checked = true;
+            this.optionCleanupUnusedExtensionsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.optionCleanupUnusedExtensionsToolStripMenuItem.Name = "optionCleanupUnusedExtensionsToolStripMenuItem";
+            this.optionCleanupUnusedExtensionsToolStripMenuItem.Size = new System.Drawing.Size(369, 22);
+            this.optionCleanupUnusedExtensionsToolStripMenuItem.Text = "Cleanup unused diagnostics extensions when deploying";
+            this.optionCleanupUnusedExtensionsToolStripMenuItem.Click += new System.EventHandler(this.HandleOptionCleanupUnusedDiagnosticsExtensions);
+            // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.changelogToolStripMenuItem,
+            this.submitFeedbacknotYetAvailableToolStripMenuItem,
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
@@ -116,14 +147,21 @@
             // changelogToolStripMenuItem
             // 
             this.changelogToolStripMenuItem.Name = "changelogToolStripMenuItem";
-            this.changelogToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.changelogToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
             this.changelogToolStripMenuItem.Text = "Changelog...";
             this.changelogToolStripMenuItem.Click += new System.EventHandler(this.HandleChangelogClicked);
+            // 
+            // submitFeedbacknotYetAvailableToolStripMenuItem
+            // 
+            this.submitFeedbacknotYetAvailableToolStripMenuItem.Enabled = false;
+            this.submitFeedbacknotYetAvailableToolStripMenuItem.Name = "submitFeedbacknotYetAvailableToolStripMenuItem";
+            this.submitFeedbacknotYetAvailableToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
+            this.submitFeedbacknotYetAvailableToolStripMenuItem.Text = "Submit feedback... (not yet available)";
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
             this.aboutToolStripMenuItem.Text = "About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.HandleAboutClicked);
             // 
@@ -181,7 +219,12 @@
             // 
             // gbQuickDeploy
             // 
-            this.gbQuickDeploy.Controls.Add(this.btnGenerateLabel);
+            this.gbQuickDeploy.Controls.Add(this.pictureBox2);
+            this.gbQuickDeploy.Controls.Add(this.lblLabelPreview);
+            this.gbQuickDeploy.Controls.Add(this.lblPreview);
+            this.gbQuickDeploy.Controls.Add(this.btnClearDiagConfig);
+            this.gbQuickDeploy.Controls.Add(this.btnClearCloudConfig);
+            this.gbQuickDeploy.Controls.Add(this.btnClearCloudPackage);
             this.gbQuickDeploy.Controls.Add(this.label11);
             this.gbQuickDeploy.Controls.Add(this.tbLabel);
             this.gbQuickDeploy.Controls.Add(this.cbDiagStorage);
@@ -212,7 +255,89 @@
             this.gbQuickDeploy.Size = new System.Drawing.Size(613, 366);
             this.gbQuickDeploy.TabIndex = 4;
             this.gbQuickDeploy.TabStop = false;
+            this.gbQuickDeploy.Tag = "KEEP_ENABLED";
             this.gbQuickDeploy.Text = "Quick Deploy";
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pictureBox2.Image = global::AzureCloudserviceDeployer.Properties.Resources.Info_icon;
+            this.pictureBox2.Location = new System.Drawing.Point(402, 277);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(16, 16);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.TabIndex = 32;
+            this.pictureBox2.TabStop = false;
+            this.pictureBox2.Tag = "KEEP_ENABLED";
+            this.toolTip1.SetToolTip(this.pictureBox2, "Label variables are updated when Deploy is clicked. Available tags: UTCDT, MACHIN" +
+        "E, USER");
+            this.pictureBox2.Click += new System.EventHandler(this.HandleTooltipClick);
+            // 
+            // lblLabelPreview
+            // 
+            this.lblLabelPreview.AutoSize = true;
+            this.lblLabelPreview.Location = new System.Drawing.Point(164, 298);
+            this.lblLabelPreview.Name = "lblLabelPreview";
+            this.lblLabelPreview.Size = new System.Drawing.Size(56, 13);
+            this.lblLabelPreview.TabIndex = 31;
+            this.lblLabelPreview.Text = "<preview>";
+            // 
+            // lblPreview
+            // 
+            this.lblPreview.AutoSize = true;
+            this.lblPreview.Location = new System.Drawing.Point(110, 298);
+            this.lblPreview.Name = "lblPreview";
+            this.lblPreview.Size = new System.Drawing.Size(48, 13);
+            this.lblPreview.TabIndex = 30;
+            this.lblPreview.Text = "Preview:";
+            // 
+            // btnClearDiagConfig
+            // 
+            this.btnClearDiagConfig.Location = new System.Drawing.Point(207, 217);
+            this.btnClearDiagConfig.Name = "btnClearDiagConfig";
+            this.btnClearDiagConfig.Size = new System.Drawing.Size(27, 23);
+            this.btnClearDiagConfig.TabIndex = 29;
+            this.btnClearDiagConfig.Text = "X";
+            this.btnClearDiagConfig.UseVisualStyleBackColor = true;
+            this.btnClearDiagConfig.Click += new System.EventHandler(this.HandleClearDiagConfig);
+            // 
+            // btnClearCloudConfig
+            // 
+            this.btnClearCloudConfig.Location = new System.Drawing.Point(207, 188);
+            this.btnClearCloudConfig.Name = "btnClearCloudConfig";
+            this.btnClearCloudConfig.Size = new System.Drawing.Size(27, 23);
+            this.btnClearCloudConfig.TabIndex = 28;
+            this.btnClearCloudConfig.Text = "X";
+            this.btnClearCloudConfig.UseVisualStyleBackColor = true;
+            this.btnClearCloudConfig.Click += new System.EventHandler(this.HandleClearCloudConfig);
+            // 
+            // btnClearCloudPackage
+            // 
+            this.btnClearCloudPackage.Location = new System.Drawing.Point(207, 159);
+            this.btnClearCloudPackage.Name = "btnClearCloudPackage";
+            this.btnClearCloudPackage.Size = new System.Drawing.Size(27, 23);
+            this.btnClearCloudPackage.TabIndex = 27;
+            this.btnClearCloudPackage.Text = "X";
+            this.btnClearCloudPackage.UseVisualStyleBackColor = true;
+            this.btnClearCloudPackage.Click += new System.EventHandler(this.HandleClearCloudPackage);
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(9, 277);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(36, 13);
+            this.label11.TabIndex = 25;
+            this.label11.Text = "Label:";
+            // 
+            // tbLabel
+            // 
+            this.tbLabel.Location = new System.Drawing.Point(113, 274);
+            this.tbLabel.Name = "tbLabel";
+            this.tbLabel.Size = new System.Drawing.Size(283, 20);
+            this.tbLabel.TabIndex = 24;
+            this.tbLabel.Text = "[UTCDT] [MACHINE] [USER] ";
+            this.tbLabel.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HandleLabelKeyUp);
             // 
             // cbDiagStorage
             // 
@@ -234,6 +359,7 @@
             // 
             // pictureBox1
             // 
+            this.pictureBox1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pictureBox1.Image = global::AzureCloudserviceDeployer.Properties.Resources.Info_icon;
             this.pictureBox1.Location = new System.Drawing.Point(402, 81);
             this.pictureBox1.Name = "pictureBox1";
@@ -241,15 +367,17 @@
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 21;
             this.pictureBox1.TabStop = false;
+            this.pictureBox1.Tag = "KEEP_ENABLED";
             this.toolTip1.SetToolTip(this.pictureBox1, "This storage account is only used for temporary storage to upload the package. No" +
         "t for diagnostics. So it doesn\'t really matter what this is set to.");
+            this.pictureBox1.Click += new System.EventHandler(this.HandleTooltipClick);
             // 
             // btnDeploy
             // 
             this.btnDeploy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDeploy.Location = new System.Drawing.Point(113, 300);
+            this.btnDeploy.Location = new System.Drawing.Point(113, 318);
             this.btnDeploy.Name = "btnDeploy";
-            this.btnDeploy.Size = new System.Drawing.Size(142, 53);
+            this.btnDeploy.Size = new System.Drawing.Size(142, 35);
             this.btnDeploy.TabIndex = 19;
             this.btnDeploy.Text = "Deploy";
             this.btnDeploy.UseVisualStyleBackColor = true;
@@ -349,7 +477,7 @@
             // 
             this.btnBrowseDiagnostics.Location = new System.Drawing.Point(113, 217);
             this.btnBrowseDiagnostics.Name = "btnBrowseDiagnostics";
-            this.btnBrowseDiagnostics.Size = new System.Drawing.Size(121, 23);
+            this.btnBrowseDiagnostics.Size = new System.Drawing.Size(88, 23);
             this.btnBrowseDiagnostics.TabIndex = 8;
             this.btnBrowseDiagnostics.Text = "Browse...";
             this.btnBrowseDiagnostics.UseVisualStyleBackColor = true;
@@ -359,7 +487,7 @@
             // 
             this.btnBrowseCloudConfig.Location = new System.Drawing.Point(113, 188);
             this.btnBrowseCloudConfig.Name = "btnBrowseCloudConfig";
-            this.btnBrowseCloudConfig.Size = new System.Drawing.Size(121, 23);
+            this.btnBrowseCloudConfig.Size = new System.Drawing.Size(88, 23);
             this.btnBrowseCloudConfig.TabIndex = 7;
             this.btnBrowseCloudConfig.Text = "Browse...";
             this.btnBrowseCloudConfig.UseVisualStyleBackColor = true;
@@ -369,7 +497,7 @@
             // 
             this.btnBrowseCloudPackage.Location = new System.Drawing.Point(113, 159);
             this.btnBrowseCloudPackage.Name = "btnBrowseCloudPackage";
-            this.btnBrowseCloudPackage.Size = new System.Drawing.Size(121, 23);
+            this.btnBrowseCloudPackage.Size = new System.Drawing.Size(88, 23);
             this.btnBrowseCloudPackage.TabIndex = 6;
             this.btnBrowseCloudPackage.Text = "Browse...";
             this.btnBrowseCloudPackage.UseVisualStyleBackColor = true;
@@ -432,15 +560,33 @@
             // 
             // lbLog
             // 
+            this.lbLog.ContextMenuStrip = this.lbLogContextMenu;
             this.lbLog.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lbLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbLog.FormattingEnabled = true;
+            this.lbLog.HorizontalScrollbar = true;
             this.lbLog.ItemHeight = 12;
             this.lbLog.Location = new System.Drawing.Point(3, 16);
             this.lbLog.Name = "lbLog";
+            this.lbLog.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.lbLog.Size = new System.Drawing.Size(607, 131);
             this.lbLog.TabIndex = 5;
             this.lbLog.Tag = "KEEP_ENABLED";
+            // 
+            // lbLogContextMenu
+            // 
+            this.lbLogContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyToolStripMenuItem});
+            this.lbLogContextMenu.Name = "lbLogContextMenu";
+            this.lbLogContextMenu.ShowImageMargin = false;
+            this.lbLogContextMenu.Size = new System.Drawing.Size(78, 26);
+            // 
+            // copyToolStripMenuItem
+            // 
+            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(77, 22);
+            this.copyToolStripMenuItem.Text = "Copy";
+            this.copyToolStripMenuItem.Click += new System.EventHandler(this.HandleLogCopyClicked);
             // 
             // groupBox3
             // 
@@ -455,33 +601,13 @@
             // 
             // toolTip1
             // 
-            this.toolTip1.IsBalloon = true;
-            // 
-            // tbLabel
-            // 
-            this.tbLabel.Location = new System.Drawing.Point(207, 274);
-            this.tbLabel.Name = "tbLabel";
-            this.tbLabel.Size = new System.Drawing.Size(400, 20);
-            this.tbLabel.TabIndex = 24;
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(9, 277);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(36, 13);
-            this.label11.TabIndex = 25;
-            this.label11.Text = "Label:";
-            // 
-            // btnGenerateLabel
-            // 
-            this.btnGenerateLabel.Location = new System.Drawing.Point(113, 272);
-            this.btnGenerateLabel.Name = "btnGenerateLabel";
-            this.btnGenerateLabel.Size = new System.Drawing.Size(88, 23);
-            this.btnGenerateLabel.TabIndex = 26;
-            this.btnGenerateLabel.Text = "Generate";
-            this.btnGenerateLabel.UseVisualStyleBackColor = true;
-            this.btnGenerateLabel.Click += new System.EventHandler(this.HandleGenerateLabelClicked);
+            this.toolTip1.AutomaticDelay = 0;
+            this.toolTip1.AutoPopDelay = 5500;
+            this.toolTip1.InitialDelay = 0;
+            this.toolTip1.ReshowDelay = 0;
+            this.toolTip1.ShowAlways = true;
+            this.toolTip1.UseAnimation = false;
+            this.toolTip1.UseFading = false;
             // 
             // MainForm
             // 
@@ -495,6 +621,7 @@
             this.Controls.Add(this.menuStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MainMenuStrip = this.menuStrip1;
+            this.MaximizeBox = false;
             this.Name = "MainForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Azure Cloudservice Deployer";
@@ -508,7 +635,9 @@
             this.flowLayoutPanel1.PerformLayout();
             this.gbQuickDeploy.ResumeLayout(false);
             this.gbQuickDeploy.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.lbLogContextMenu.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -557,7 +686,17 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.TextBox tbLabel;
-        private System.Windows.Forms.Button btnGenerateLabel;
+        private System.Windows.Forms.Button btnClearDiagConfig;
+        private System.Windows.Forms.Button btnClearCloudConfig;
+        private System.Windows.Forms.Button btnClearCloudPackage;
+        private System.Windows.Forms.ContextMenuStrip lbLogContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
+        private System.Windows.Forms.Label lblLabelPreview;
+        private System.Windows.Forms.Label lblPreview;
+        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem optionCleanupUnusedExtensionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem submitFeedbacknotYetAvailableToolStripMenuItem;
     }
 }
 

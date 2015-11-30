@@ -85,7 +85,8 @@ namespace AzureCloudserviceDeployer
 
         public static async Task DeployAsync(SubscriptionListOperationResponse.Subscription subscription, HostedServiceListResponse.HostedService service,
             StorageAccount storage, DeploymentSlot slot, UpgradePreference upgradePreference, string pathToCspkg,
-            string pathToCscfg, string pathToDiagExtensionConfig, StorageAccount diagStorage, string deploymentLabel)
+            string pathToCscfg, string pathToDiagExtensionConfig, StorageAccount diagStorage, string deploymentLabel,
+            bool cleanupUnusedExtensions)
         {
             Logger.InfoFormat("Preparing for deployment of {0}...", service.ServiceName);
             var computeClient = new ComputeManagementClient(await GetCredentialsAsync(subscription));
@@ -156,20 +157,14 @@ namespace AzureCloudserviceDeployer
             var availableExtensions = await computeClient.HostedServices.ListAvailableExtensionsAsync();
             var availableDiagnosticsExtension = availableExtensions.Where(d => d.Type == "PaaSDiagnostics").First();
 
-            // Check if diag extension already exists for this service. If so, delete it.
-            Logger.InfoFormat("Retrieving current extensions for {0}...", service.ServiceName);
-            var currentExtensions = await computeClient.HostedServices.ListExtensionsAsync(service.ServiceName);
-            foreach (var currentDiagExtension in currentExtensions.Where(d => d.Type == availableDiagnosticsExtension.Type))
+            // Cleanup of existing extensions
+            if (cleanupUnusedExtensions)
             {
-                Logger.InfoFormat("Deleting diagnostics extension named {0}...", currentDiagExtension.Id);
-                try
-                {
-                    await computeClient.HostedServices.DeleteExtensionAsync(service.ServiceName, currentDiagExtension.Id);
-                }
-                catch (Exception ex)
-                {
-                    Logger.WarnFormat("Couldn't delete extension {0}, might be in use...", currentDiagExtension.Id);
-                }
+                await CleanupExistingExtensions(service, computeClient, availableDiagnosticsExtension);
+            }
+            else
+            {
+                Logger.InfoFormat("Skip cleaning unused extensions as configured");
             }
 
             // Extensions config
@@ -222,6 +217,7 @@ namespace AzureCloudserviceDeployer
                 ExtensionConfiguration = extensionConfiguration,
                 Mode = upgradePreference == UpgradePreference.UpgradeSimultaneously ? DeploymentUpgradeMode.Simultaneous : DeploymentUpgradeMode.Auto
             };
+            Logger.InfoFormat("Label for deployment: {0}", deployParams.Label);
 
             switch (upgradePreference)
             {
@@ -295,6 +291,55 @@ namespace AzureCloudserviceDeployer
             }
 
             Logger.InfoFormat("Deployment succesful");
+        }
+
+        private static async Task CleanupExistingExtensions(HostedServiceListResponse.HostedService service, ComputeManagementClient computeClient, ExtensionImage availableDiagnosticsExtension)
+        {
+
+            // Get whatever is currently on Production
+            Logger.InfoFormat("Retrieving current deployment details and currently used extensions...");
+            DeploymentGetResponse currentProductionSlotDetails = null, currentStagingSlotDetails = null;
+            var details = computeClient.HostedServices.GetDetailed(service.ServiceName);
+            if (details.Deployments.Where(s => s.DeploymentSlot == DeploymentSlot.Production).Any())
+                currentProductionSlotDetails = await computeClient.Deployments.GetBySlotAsync(service.ServiceName, DeploymentSlot.Production);
+            if (details.Deployments.Where(s => s.DeploymentSlot == DeploymentSlot.Staging).Any())
+                currentStagingSlotDetails = await computeClient.Deployments.GetBySlotAsync(service.ServiceName, DeploymentSlot.Staging);
+
+            // Compile a list of diagnostic id's still in use
+            List<string> diagIdsInUse = new List<string>();
+            if (currentProductionSlotDetails != null && currentProductionSlotDetails.ExtensionConfiguration != null)
+            {
+                diagIdsInUse.AddRange(currentProductionSlotDetails.ExtensionConfiguration.AllRoles.Select(s => s.Id));
+                diagIdsInUse.AddRange(currentProductionSlotDetails.ExtensionConfiguration.NamedRoles.SelectMany(s => s.Extensions).Select(s => s.Id));
+            }
+            if (currentStagingSlotDetails != null && currentStagingSlotDetails.ExtensionConfiguration != null)
+            {
+                diagIdsInUse.AddRange(currentStagingSlotDetails.ExtensionConfiguration.AllRoles.Select(s => s.Id));
+                diagIdsInUse.AddRange(currentStagingSlotDetails.ExtensionConfiguration.NamedRoles.SelectMany(s => s.Extensions).Select(s => s.Id));
+            }
+
+            // Check if diag extension already exists for this service. If so, delete it.
+            Logger.InfoFormat("Retrieving all extensions for {0}...", service.ServiceName);
+            var currentExtensions = await computeClient.HostedServices.ListExtensionsAsync(service.ServiceName);
+            foreach (var currentDiagExtension in currentExtensions.Where(d => d.Type == availableDiagnosticsExtension.Type))
+            {
+                if (diagIdsInUse.Contains(currentDiagExtension.Id))
+                {
+                    Logger.InfoFormat("Skip deleting diagnostics extension {0}, because it is in use by the deployment", currentDiagExtension.Id);
+                }
+                else
+                {
+                    Logger.InfoFormat("Deleting unused diagnostics extension named {0}...", currentDiagExtension.Id);
+                    try
+                    {
+                        await computeClient.HostedServices.DeleteExtensionAsync(service.ServiceName, currentDiagExtension.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.ErrorFormat("Couldn't delete extension {0}, might be in use...", currentDiagExtension.Id);
+                    }
+                }
+            }
         }
     }
 }

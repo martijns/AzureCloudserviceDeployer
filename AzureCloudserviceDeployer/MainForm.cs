@@ -38,6 +38,9 @@ namespace AzureCloudserviceDeployer
             lbLog.DrawMode = DrawMode.OwnerDrawFixed;
             lbLog.DrawItem += HandleDrawLogItem;
             ((Hierarchy)LogManager.GetRepository()).Root.AddAppender(this);
+
+            // Load options from configuration
+            optionCleanupUnusedExtensionsToolStripMenuItem.Checked = Configuration.Instance.CleanupUnusedExtensions;
         }
 
         private void HandleMainformShown(object sender, EventArgs e)
@@ -45,6 +48,7 @@ namespace AzureCloudserviceDeployer
             Logger.Debug("HandleMainformShown");
             UpdateFormState();
             AppVersion.CheckForUpdateAsync();
+            lblLabelPreview.Text = GetRenderedLabel();
         }
 
         private void HandleChangelogClicked(object sender, EventArgs e)
@@ -160,7 +164,6 @@ namespace AzureCloudserviceDeployer
                 cbDiagStorage.SelectedIndex = 0;
 
                 UpdateFormState();
-                HandleGenerateLabelClicked(this, EventArgs.Empty);
             });
         }
 
@@ -175,10 +178,14 @@ namespace AzureCloudserviceDeployer
             UpdateControlEnabledState(btnBrowseCloudPackage, state);
             UpdateControlEnabledState(btnBrowseCloudConfig, state);
             UpdateControlEnabledState(btnBrowseDiagnostics, state);
+            UpdateControlEnabledState(btnClearCloudPackage, state);
+            UpdateControlEnabledState(btnClearCloudConfig, state);
+            UpdateControlEnabledState(btnClearDiagConfig, state);
             UpdateControlEnabledState(cbDiagStorage, state);
-            UpdateControlEnabledState(btnGenerateLabel, state);
             UpdateControlEnabledState(tbLabel, state);
             UpdateControlEnabledState(btnDeploy, state);
+            UpdateControlEnabledState(lblPreview, state);
+            UpdateControlEnabledState(lblLabelPreview, state);
         }
 
         private string SelectFile(string filter)
@@ -216,13 +223,13 @@ namespace AzureCloudserviceDeployer
         private void UpdateSelectedFiles(string path)
         {
             Logger.Debug("UpdateSelectedFiles");
+            if (path == null)
+                return;
             if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
             {
                 foreach (var file in Directory.EnumerateFileSystemEntries(path))
                     UpdateSelectedFiles(file);
             }
-            if (path == null)
-                return;
             if (path.EndsWith(".cspkg", StringComparison.OrdinalIgnoreCase))
                 _selectedPackage = path;
             if (path.EndsWith(".cscfg", StringComparison.OrdinalIgnoreCase))
@@ -245,7 +252,8 @@ namespace AzureCloudserviceDeployer
                 var slot = (DeploymentSlot)cbSlot.SelectedItem;
                 var pref = ((KeyValuePair<UpgradePreference,string>)cbUpgradePreference.SelectedItem).Key;
                 var diagstorage = cbDiagStorage.SelectedItem as StorageAccount;
-                var deploymentLabel = tbLabel.Text;
+                lblLabelPreview.Text = GetRenderedLabel();
+                var deploymentLabel = GetRenderedLabel();
 
                 try
                 {
@@ -262,10 +270,16 @@ namespace AzureCloudserviceDeployer
                     if (_selectedDiag == null)
                         if (MessageBox.Show("Diagnostics configuration is not selected. Are you sure you want to continue?", "Diagnostics Configuration", MessageBoxButtons.YesNo) != DialogResult.Yes)
                             return;
+                    if (!File.Exists(_selectedPackage))
+                        throw new ApplicationException("The specified .cspkg no longer exists on the filesystem: " + _selectedPackage);
+                    if (!File.Exists(_selectedConfig))
+                        throw new ApplicationException("The specified .cscfg no longer exists on the filesystem:" + _selectedConfig);
+                    if (_selectedDiag != null && !File.Exists(_selectedDiag))
+                        throw new ApplicationException("The specified diagnostics configuration file no longer exists on the filesystem: " + _selectedDiag);
 
                     try
                     {
-                        await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage, deploymentLabel);
+                        await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage, deploymentLabel, Configuration.Instance.CleanupUnusedExtensions);
                     }
                     catch (CloudException cex)
                     {
@@ -309,14 +323,52 @@ namespace AzureCloudserviceDeployer
                 if (li.Level == Level.Warn)
                     backColor = Color.Yellow;
                 if (li.Level == Level.Error)
-                    backColor = Color.Pink;
+                    backColor = Color.LightPink;
             }
 
-            e.DrawBackground();
+            if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+            {
+                backColor = ChangeColorBrightness(backColor, -0.1f);
+            }
+
             Graphics g = e.Graphics;
+
+            string msg = lb.Items[e.Index].ToString();
+
+            int hzSize = (int)g.MeasureString(msg, lb.Font).Width;
+            if (lb.HorizontalExtent < hzSize)
+                lb.HorizontalExtent = hzSize;
+
+            e.DrawBackground();
             g.FillRectangle(new SolidBrush(backColor), e.Bounds);
-            g.DrawString(lb.Items[e.Index].ToString(), e.Font, new SolidBrush(Color.Black), new PointF(e.Bounds.X, e.Bounds.Y));
+            g.DrawString(msg, e.Font, new SolidBrush(Color.Black), new PointF(e.Bounds.X, e.Bounds.Y));
             e.DrawFocusRectangle();
+        }
+
+        /// <summary>
+        /// http://www.pvladov.com/2012/09/make-color-lighter-or-darker.html
+        /// </summary>
+        public static Color ChangeColorBrightness(Color color, float correctionFactor)
+        {
+            float red = (float)color.R;
+            float green = (float)color.G;
+            float blue = (float)color.B;
+
+            if (correctionFactor < 0)
+            {
+                correctionFactor = 1 + correctionFactor;
+                red *= correctionFactor;
+                green *= correctionFactor;
+                blue *= correctionFactor;
+            }
+            else
+            {
+                red = (255 - red) * correctionFactor + red;
+                green = (255 - green) * correctionFactor + green;
+                blue = (255 - blue) * correctionFactor + blue;
+            }
+
+            return Color.FromArgb(color.A, (int)red, (int)green, (int)blue);
         }
 
         public void DoAppend(LoggingEvent loggingEvent)
@@ -337,6 +389,20 @@ namespace AzureCloudserviceDeployer
             {
                 return string.Format("{0}: {1}", TimeStamp.ToString("HH:mm:ss"), Message);
             }
+
+            public string ToStringWithLevel()
+            {
+                return string.Format("{0} [{2}] {1}", TimeStamp.ToString("HH:mm:ss"), Message, Level.ToString());
+            }
+        }
+
+        private void HandleLogCopyClicked(object sender, EventArgs e)
+        {
+            if (lbLog.SelectedItems.Count == 0)
+                return;
+
+            string[] selectedLog = lbLog.SelectedItems.Cast<LogItem>().Select(li => li.ToStringWithLevel()).ToArray();
+            Clipboard.SetText(string.Join("\r\n", selectedLog));
         }
 
         #endregion
@@ -353,12 +419,53 @@ namespace AzureCloudserviceDeployer
                 UpdateSelectedFiles(file);
         }
 
-        private void HandleGenerateLabelClicked(object sender, EventArgs e)
+        private void HandleTooltipClick(object sender, EventArgs e)
         {
-            tbLabel.Text = DateTime.UtcNow.ToString("u") + " " + Environment.MachineName + " " + Environment.UserName + " ";
-            if (btnGenerateLabel.ContainsFocus)
-                tbLabel.Focus();
-            tbLabel.Select(tbLabel.Text.Length, 0);
+            var control = sender as Control;
+            if (control == null)
+                return;
+
+            string tooltipMsg = toolTip1.GetToolTip(control);
+            toolTip1.Show(tooltipMsg, control);
+        }
+
+        private void HandleClearDiagConfig(object sender, EventArgs e)
+        {
+            _selectedDiag = null;
+            lblSelectedDiag.Text = "<cleared>";
+        }
+
+        private void HandleClearCloudConfig(object sender, EventArgs e)
+        {
+            _selectedConfig = null;
+            lblSelectedConfig.Text = "<cleared>";
+        }
+
+        private void HandleClearCloudPackage(object sender, EventArgs e)
+        {
+            _selectedPackage = null;
+            lblSelectedPackage.Text = "<cleared>";
+        }
+
+        private string GetRenderedLabel()
+        {
+            string label = tbLabel.Text;
+            label = label.Replace("[UTCDT]", DateTime.UtcNow.ToString("u"));
+            label = label.Replace("[MACHINE]", Environment.MachineName);
+            label = label.Replace("[USER]", Environment.UserName);
+            return label;
+        }
+
+        private void HandleLabelKeyUp(object sender, KeyEventArgs e)
+        {
+            lblLabelPreview.Text = GetRenderedLabel();
+        }
+
+        private void HandleOptionCleanupUnusedDiagnosticsExtensions(object sender, EventArgs e)
+        {
+            optionCleanupUnusedExtensionsToolStripMenuItem.Checked = !optionCleanupUnusedExtensionsToolStripMenuItem.Checked;
+            Configuration.Instance.CleanupUnusedExtensions = optionCleanupUnusedExtensionsToolStripMenuItem.Checked;
+            Configuration.Instance.Save();
         }
     }
 }
