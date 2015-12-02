@@ -41,6 +41,7 @@ namespace AzureCloudserviceDeployer
 
             // Load options from configuration
             optionCleanupUnusedExtensionsToolStripMenuItem.Checked = Configuration.Instance.CleanupUnusedExtensions;
+            optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Checked = Configuration.Instance.AutoDownloadPackageBeforeDeploy;
         }
 
         private void HandleMainformShown(object sender, EventArgs e)
@@ -184,6 +185,7 @@ namespace AzureCloudserviceDeployer
             UpdateControlEnabledState(cbDiagStorage, state);
             UpdateControlEnabledState(tbLabel, state);
             UpdateControlEnabledState(btnDeploy, state);
+            UpdateControlEnabledState(btnDownloadExistingPackage, state);
             UpdateControlEnabledState(lblPreview, state);
             UpdateControlEnabledState(lblLabelPreview, state);
         }
@@ -257,6 +259,8 @@ namespace AzureCloudserviceDeployer
 
                 try
                 {
+                    if (Configuration.Instance.AutoDownloadPackageBeforeDeploy && !await CheckAndChoosePackageDownloadLocation())
+                        throw new ApplicationException("A download location for packages must be selected");
                     if (subscription == null)
                         throw new ApplicationException("Subscription must be selectered");
                     if (service == null)
@@ -279,6 +283,9 @@ namespace AzureCloudserviceDeployer
 
                     try
                     {
+                        if (Configuration.Instance.AutoDownloadPackageBeforeDeploy)
+                            await AzureHelper.DownloadDeploymentAsync(subscription, service, slot, packageStorage, Configuration.Instance.PackageDownloadPath, true);
+
                         await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage, deploymentLabel, Configuration.Instance.CleanupUnusedExtensions);
                     }
                     catch (CloudException cex)
@@ -466,6 +473,87 @@ namespace AzureCloudserviceDeployer
             optionCleanupUnusedExtensionsToolStripMenuItem.Checked = !optionCleanupUnusedExtensionsToolStripMenuItem.Checked;
             Configuration.Instance.CleanupUnusedExtensions = optionCleanupUnusedExtensionsToolStripMenuItem.Checked;
             Configuration.Instance.Save();
+        }
+
+        private void HandleAutoDownloadExistingPackageOptionClicked(object sender, EventArgs e)
+        {
+            optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Checked = !optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Checked;
+            Configuration.Instance.AutoDownloadPackageBeforeDeploy = optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Checked;
+            Configuration.Instance.Save();
+        }
+
+        private async void HandleDownloadPackageClicked(object sender, EventArgs e)
+        {
+            Logger.Debug("HandleDownloadPackageClicked");
+            await PerformWorkAsync(this, null, async () =>
+            {
+                var subscription = cbSubscriptions.SelectedItem as SubscriptionListOperationResponse.Subscription;
+                var service = cbCloudservices.SelectedItem as HostedServiceListResponse.HostedService;
+                var packageStorage = cbPackageStorage.SelectedItem as StorageAccount;
+                var slot = (DeploymentSlot)cbSlot.SelectedItem;
+
+                try
+                {
+                    if (!await CheckAndChoosePackageDownloadLocation())
+                        throw new ApplicationException("A download location for packages must be selected");
+                    if (subscription == null)
+                        throw new ApplicationException("Subscription must be selectered");
+                    if (service == null)
+                        throw new ApplicationException("Cloudservice must be selected");
+                    if (packageStorage == null)
+                        throw new ApplicationException("Package storage account must be selected");
+
+                    try
+                    {
+                        await AzureHelper.DownloadDeploymentAsync(subscription, service, slot, packageStorage, Configuration.Instance.PackageDownloadPath);
+                    }
+                    catch (CloudException cex)
+                    {
+                        Logger.Error(cex.Message);
+                    }
+                }
+                catch (ApplicationException aex)
+                {
+                    // We use ApplicationExceptions to indicate a custom error. All other errors will result in a ReportBug dialog.
+                    MessageBox.Show("Deployment failed: " + aex.Message);
+                }
+            });
+        }
+
+        private async Task<bool> CheckAndChoosePackageDownloadLocation()
+        {
+            if (string.IsNullOrEmpty(Configuration.Instance.PackageDownloadPath) || !Directory.Exists(Configuration.Instance.PackageDownloadPath))
+            {
+                await ChoosePackageDownloadLocation();
+            }
+
+            if (string.IsNullOrEmpty(Configuration.Instance.PackageDownloadPath) || !Directory.Exists(Configuration.Instance.PackageDownloadPath))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private async Task ChoosePackageDownloadLocation()
+        {
+            var dialog = new FolderBrowserDialog();
+            dialog.Description = "Select a location to download packages to";
+            var result = dialog.ShowDialog(this);
+            if (result == DialogResult.Cancel)
+                return;
+
+            Configuration.Instance.PackageDownloadPath = dialog.SelectedPath;
+            Configuration.Instance.Save();
+        }
+
+        private async void HandleConfigureDownloadPathOptionClicked(object sender, EventArgs e)
+        {
+            await ChoosePackageDownloadLocation();
+        }
+
+        private void HandleSubmitFeedbackClicked(object sender, EventArgs e)
+        {
+            new FeedbackForm().ShowDialog(this);
         }
     }
 }

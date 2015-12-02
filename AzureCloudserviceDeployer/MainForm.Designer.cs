@@ -34,6 +34,9 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionCleanupUnusedExtensionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionConfigureDownloadPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.changelogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.submitFeedbacknotYetAvailableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,6 +47,7 @@
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.lblLoggedInUser = new System.Windows.Forms.Label();
             this.gbQuickDeploy = new System.Windows.Forms.GroupBox();
+            this.btnDownloadExistingPackage = new System.Windows.Forms.Button();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.lblLabelPreview = new System.Windows.Forms.Label();
             this.lblPreview = new System.Windows.Forms.Label();
@@ -120,7 +124,10 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.optionCleanupUnusedExtensionsToolStripMenuItem});
+            this.optionCleanupUnusedExtensionsToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem,
+            this.optionConfigureDownloadPathToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -133,6 +140,25 @@
             this.optionCleanupUnusedExtensionsToolStripMenuItem.Size = new System.Drawing.Size(369, 22);
             this.optionCleanupUnusedExtensionsToolStripMenuItem.Text = "Cleanup unused diagnostics extensions when deploying";
             this.optionCleanupUnusedExtensionsToolStripMenuItem.Click += new System.EventHandler(this.HandleOptionCleanupUnusedDiagnosticsExtensions);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(366, 6);
+            // 
+            // optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem
+            // 
+            this.optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Name = "optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem";
+            this.optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Size = new System.Drawing.Size(369, 22);
+            this.optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Text = "Auto-download existing package before deploying";
+            this.optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Click += new System.EventHandler(this.HandleAutoDownloadExistingPackageOptionClicked);
+            // 
+            // optionConfigureDownloadPathToolStripMenuItem
+            // 
+            this.optionConfigureDownloadPathToolStripMenuItem.Name = "optionConfigureDownloadPathToolStripMenuItem";
+            this.optionConfigureDownloadPathToolStripMenuItem.Size = new System.Drawing.Size(369, 22);
+            this.optionConfigureDownloadPathToolStripMenuItem.Text = "Configure download path...";
+            this.optionConfigureDownloadPathToolStripMenuItem.Click += new System.EventHandler(this.HandleConfigureDownloadPathOptionClicked);
             // 
             // helpToolStripMenuItem
             // 
@@ -147,21 +173,21 @@
             // changelogToolStripMenuItem
             // 
             this.changelogToolStripMenuItem.Name = "changelogToolStripMenuItem";
-            this.changelogToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
+            this.changelogToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.changelogToolStripMenuItem.Text = "Changelog...";
             this.changelogToolStripMenuItem.Click += new System.EventHandler(this.HandleChangelogClicked);
             // 
             // submitFeedbacknotYetAvailableToolStripMenuItem
             // 
-            this.submitFeedbacknotYetAvailableToolStripMenuItem.Enabled = false;
             this.submitFeedbacknotYetAvailableToolStripMenuItem.Name = "submitFeedbacknotYetAvailableToolStripMenuItem";
-            this.submitFeedbacknotYetAvailableToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
-            this.submitFeedbacknotYetAvailableToolStripMenuItem.Text = "Submit feedback... (not yet available)";
+            this.submitFeedbacknotYetAvailableToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.submitFeedbacknotYetAvailableToolStripMenuItem.Text = "Submit feedback...";
+            this.submitFeedbacknotYetAvailableToolStripMenuItem.Click += new System.EventHandler(this.HandleSubmitFeedbackClicked);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.aboutToolStripMenuItem.Text = "About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.HandleAboutClicked);
             // 
@@ -219,6 +245,7 @@
             // 
             // gbQuickDeploy
             // 
+            this.gbQuickDeploy.Controls.Add(this.btnDownloadExistingPackage);
             this.gbQuickDeploy.Controls.Add(this.pictureBox2);
             this.gbQuickDeploy.Controls.Add(this.lblLabelPreview);
             this.gbQuickDeploy.Controls.Add(this.lblPreview);
@@ -257,6 +284,17 @@
             this.gbQuickDeploy.TabStop = false;
             this.gbQuickDeploy.Tag = "KEEP_ENABLED";
             this.gbQuickDeploy.Text = "Quick Deploy";
+            // 
+            // btnDownloadExistingPackage
+            // 
+            this.btnDownloadExistingPackage.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDownloadExistingPackage.Location = new System.Drawing.Point(402, 105);
+            this.btnDownloadExistingPackage.Name = "btnDownloadExistingPackage";
+            this.btnDownloadExistingPackage.Size = new System.Drawing.Size(107, 48);
+            this.btnDownloadExistingPackage.TabIndex = 33;
+            this.btnDownloadExistingPackage.Text = "Download existing package...";
+            this.btnDownloadExistingPackage.UseVisualStyleBackColor = true;
+            this.btnDownloadExistingPackage.Click += new System.EventHandler(this.HandleDownloadPackageClicked);
             // 
             // pictureBox2
             // 
@@ -697,6 +735,10 @@
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem optionCleanupUnusedExtensionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem submitFeedbacknotYetAvailableToolStripMenuItem;
+        private System.Windows.Forms.Button btnDownloadExistingPackage;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem optionConfigureDownloadPathToolStripMenuItem;
     }
 }
 

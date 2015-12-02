@@ -32,6 +32,7 @@ namespace AzureCloudserviceDeployer
                 "AzureCloudserviceDeployer",
                 "Martijn Stolk",
                 "http://martijn.tikkie.net/reportbug.php",
+                "http://martijn.tikkie.net/feedback.php",
                 mainMethod,
                 arguments);
         }

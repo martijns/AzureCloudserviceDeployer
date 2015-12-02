@@ -341,5 +341,92 @@ namespace AzureCloudserviceDeployer
                 }
             }
         }
+
+        public static async Task DownloadDeploymentAsync(SubscriptionListOperationResponse.Subscription subscription, HostedServiceListResponse.HostedService service, DeploymentSlot slot, StorageAccount temporaryStorage, string downloadToPath, bool warnInsteadOfThrow = false)
+        {
+            Logger.InfoFormat("Preparing to download {0}/{1}...", service.ServiceName, slot);
+            var computeClient = new ComputeManagementClient(await GetCredentialsAsync(subscription));
+            var storageClient = new StorageManagementClient(await GetCredentialsAsync(subscription));
+
+            Logger.InfoFormat("Checking existing deployment in {0} slot...", slot);
+            var detailedService = await computeClient.HostedServices.GetDetailedAsync(service.ServiceName);
+            if (!detailedService.Deployments.Where(s => s.DeploymentSlot == slot).Any())
+            {
+                if (warnInsteadOfThrow)
+                {
+                    Logger.WarnFormat("No deployment found in selected slot, not downloading...");
+                    return;
+                }
+                else
+                {
+                    throw new ApplicationException("No deployment found in selected slot");
+                }
+            }
+
+            Logger.InfoFormat("Getting current diagnostics extension data (if any)...");
+            var detailedSlot = await computeClient.Deployments.GetBySlotAsync(service.ServiceName, slot);
+            string pubConfig = null;
+            if (detailedSlot.ExtensionConfiguration != null)
+            {
+                foreach (var ext in detailedSlot.ExtensionConfiguration.AllRoles.Union(detailedSlot.ExtensionConfiguration.NamedRoles.SelectMany(s => s.Extensions)))
+                {
+                    Logger.InfoFormat("Fetching extension with id {0}...", ext.Id);
+                    var extension = await computeClient.HostedServices.GetExtensionAsync(service.ServiceName, ext.Id);
+                    if (extension.Type == "PaaSDiagnostics")
+                    {
+                        Logger.InfoFormat("Found extension of type {0}, which should be the diagnostics PubConfig...", extension.Type);
+                        pubConfig = extension.PublicConfiguration;
+                    }
+                }
+            }
+            if (pubConfig == null)
+            {
+                Logger.InfoFormat("No PaaSDiagnostics extension found...");
+            }
+
+            Logger.InfoFormat("Preparing temp storage account {0}...", temporaryStorage.Name);
+            var keys = await storageClient.StorageAccounts.GetKeysAsync(temporaryStorage.Name);
+            var csa = new CloudStorageAccount(new StorageCredentials(temporaryStorage.Name, keys.PrimaryKey), true);
+            var client = csa.CreateCloudBlobClient();
+            var container = client.GetContainerReference("acd-temp-" + Guid.NewGuid().ToString("N").ToLower());
+
+            Logger.InfoFormat("Creating temp container {0}...", container.Name);
+            await container.CreateIfNotExistsAsync();
+
+            Logger.InfoFormat("Downloading package to storage account {0}...", temporaryStorage.Name);
+            var getPackageOperation = await computeClient.Deployments.GetPackageBySlotAsync(service.ServiceName, slot, new DeploymentGetPackageParameters
+            {
+                ContainerUri = container.Uri
+            });
+            while (getPackageOperation.Status == OperationStatus.InProgress)
+            {
+                Logger.InfoFormat("Waiting for operation to finish...");
+                await Task.Delay(5000);
+                getPackageOperation = await computeClient.GetOperationStatusAsync(getPackageOperation.RequestId);
+            }
+
+            Logger.InfoFormat("Downloading from storage to {0}...", downloadToPath);
+            var result = await container.ListBlobsSegmentedAsync(null);
+            var prefix = string.Format("{0} {1} {2}", DateTime.Now.ToString("yyyy-MM-dd HH-mm"), service.ServiceName, slot);
+            foreach (var item in result.Results)
+            {
+                var cloudblob = client.GetBlobReferenceFromServer(item.StorageUri);
+                string filename = prefix + " " + cloudblob.Name;
+                Logger.Info("Downloading: " + filename);
+                await cloudblob.DownloadToFileAsync(Path.Combine(downloadToPath, filename), FileMode.Create);
+            }
+
+            if (pubConfig != null)
+            {
+                Logger.InfoFormat("Writing PubConfig to {0}...", prefix + ".PubConfig.xml");
+                string pubconfigFilename = Path.Combine(downloadToPath, prefix + ".PubConfig.xml");
+                File.WriteAllText(pubconfigFilename, pubConfig);
+            }
+
+            Logger.Info("Cleaning up temp storage...");
+            await container.DeleteAsync();
+
+            Logger.Info("Package download succesful");
+        }
     }
 }

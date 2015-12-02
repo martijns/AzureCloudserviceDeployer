@@ -49,7 +49,7 @@ namespace AzureCloudserviceDeployer
                         if (customErrorHandler != null)
                             customErrorHandler(exception);
                         else
-                            new ReportBugForm(exception).ShowDialog();
+                            new ReportBugForm(exception).ShowDialog(this);
                         IsBusy = false;
                         return;
                     }
@@ -60,7 +60,7 @@ namespace AzureCloudserviceDeployer
                     }
                     catch (Exception ex)
                     {
-                        new ReportBugForm(ex).ShowDialog();
+                        new ReportBugForm(ex).ShowDialog(this);
                     }
                     finally
                     {
@@ -94,7 +94,7 @@ namespace AzureCloudserviceDeployer
                         if (customErrorHandler != null)
                             customErrorHandler(exception);
                         else
-                            new ReportBugForm(exception).ShowDialog();
+                            new ReportBugForm(exception).ShowDialog(this);
                         IsBusy = false;
                         return;
                     }
@@ -105,7 +105,7 @@ namespace AzureCloudserviceDeployer
                     }
                     catch (Exception ex)
                     {
-                        new ReportBugForm(ex).ShowDialog();
+                        new ReportBugForm(ex).ShowDialog(this);
                     }
                     finally
                     {

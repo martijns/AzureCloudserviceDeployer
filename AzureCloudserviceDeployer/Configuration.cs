@@ -26,5 +26,11 @@ namespace AzureCloudserviceDeployer
             get { return !NoCleanupUnusedExtensions; }
             set { NoCleanupUnusedExtensions = !value; }
         }
+
+        [XmlElement]
+        public bool AutoDownloadPackageBeforeDeploy { get; set; }
+
+        [XmlElement]
+        public string PackageDownloadPath { get; set; }
     }
 }

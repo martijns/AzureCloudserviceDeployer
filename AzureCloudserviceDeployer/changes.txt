@@ -1,4 +1,9 @@
-﻿2015-11-12:
+﻿2015-12-03:
+- NEW: Submit feedback via the Help -> Submit feedback button
+- NEW: Download existing deployment package, including diagnostics if applicable. The download path is saved in configuration and can be changed via the Options menu.
+- NEW: Added option to automatically download packages before deploying, if an existing deployment exists. Not enabled by default.
+
+2015-11-12:
 - FIX: Tooltip will also appear on click, even when form is disabled
 - FIX: Prevent crash when cancelling Browse dialog
 - FIX: Horizontally scroll logmessages if they're too long
