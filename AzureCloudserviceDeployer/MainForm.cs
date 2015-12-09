@@ -42,6 +42,8 @@ namespace AzureCloudserviceDeployer
             // Load options from configuration
             optionCleanupUnusedExtensionsToolStripMenuItem.Checked = Configuration.Instance.CleanupUnusedExtensions;
             optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Checked = Configuration.Instance.AutoDownloadPackageBeforeDeploy;
+            flashApplicationToolStripMenuItem.Checked = Configuration.Instance.FlashWindowWhenDone;
+            showNotificationWhenDoneToolStripMenuItem.Checked = Configuration.Instance.NotifyWhenDone;
         }
 
         private void HandleMainformShown(object sender, EventArgs e)
@@ -72,7 +74,7 @@ namespace AzureCloudserviceDeployer
                 AuthenticationResult auth = null;
                 try
                 {
-                    auth = await AzureHelper.GetAuthentication(null, true);
+                    auth = AzureHelper.GetAuthentication(null, true);
                 }
                 catch (AdalException aex)
                 {
@@ -118,6 +120,9 @@ namespace AzureCloudserviceDeployer
                 var subscription = cbSubscriptions.SelectedItem as SubscriptionListOperationResponse.Subscription;
                 if (subscription == null)
                     return;
+
+                // Clear currently selected files
+                ClearAllSelectedFiles();
 
                 // Load cloudservices
                 var hostedservices = await AzureHelper.GetCloudservicesAsync(subscription);
@@ -259,7 +264,7 @@ namespace AzureCloudserviceDeployer
 
                 try
                 {
-                    if (Configuration.Instance.AutoDownloadPackageBeforeDeploy && !await CheckAndChoosePackageDownloadLocation())
+                    if (Configuration.Instance.AutoDownloadPackageBeforeDeploy && !CheckAndChoosePackageDownloadLocation())
                         throw new ApplicationException("A download location for packages must be selected");
                     if (subscription == null)
                         throw new ApplicationException("Subscription must be selectered");
@@ -287,16 +292,19 @@ namespace AzureCloudserviceDeployer
                             await AzureHelper.DownloadDeploymentAsync(subscription, service, slot, packageStorage, Configuration.Instance.PackageDownloadPath, true);
 
                         await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage, deploymentLabel, Configuration.Instance.CleanupUnusedExtensions);
+
+                        ActionCompleted("ACD: " + service.ServiceName + "/" + slot, "Successfully deployed", ToolTipIcon.Info);
                     }
                     catch (CloudException cex)
                     {
                         Logger.Error(cex.Message);
+                        ActionCompleted("ACD: " + service.ServiceName + "/" + slot, "Failed deployment", ToolTipIcon.Error);
                     }
                 }
                 catch (ApplicationException aex)
                 {
                     // We use ApplicationExceptions to indicate a custom error. All other errors will result in a ReportBug dialog.
-                    MessageBox.Show("Deployment failed: " + aex.Message);
+                    MessageBox.Show(this, "Deployment failed: " + aex.Message);
                 }
             });
         }
@@ -416,11 +424,17 @@ namespace AzureCloudserviceDeployer
 
         private void HandleDragEnter(object sender, DragEventArgs e)
         {
+            if (IsBusy)
+                return;
+
             if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
         }
 
         private void HandleDragDrop(object sender, DragEventArgs e)
         {
+            if (IsBusy)
+                return;
+
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (var file in files)
                 UpdateSelectedFiles(file);
@@ -434,6 +448,13 @@ namespace AzureCloudserviceDeployer
 
             string tooltipMsg = toolTip1.GetToolTip(control);
             toolTip1.Show(tooltipMsg, control);
+        }
+
+        private void ClearAllSelectedFiles()
+        {
+            HandleClearDiagConfig(this, EventArgs.Empty);
+            HandleClearCloudConfig(this, EventArgs.Empty);
+            HandleClearCloudPackage(this, EventArgs.Empty);
         }
 
         private void HandleClearDiagConfig(object sender, EventArgs e)
@@ -494,7 +515,7 @@ namespace AzureCloudserviceDeployer
 
                 try
                 {
-                    if (!await CheckAndChoosePackageDownloadLocation())
+                    if (!CheckAndChoosePackageDownloadLocation())
                         throw new ApplicationException("A download location for packages must be selected");
                     if (subscription == null)
                         throw new ApplicationException("Subscription must be selectered");
@@ -506,25 +527,28 @@ namespace AzureCloudserviceDeployer
                     try
                     {
                         await AzureHelper.DownloadDeploymentAsync(subscription, service, slot, packageStorage, Configuration.Instance.PackageDownloadPath);
+
+                        ActionCompleted("ACD: " + service.ServiceName + "/" + slot, "Package downloaded", ToolTipIcon.Info);
                     }
                     catch (CloudException cex)
                     {
                         Logger.Error(cex.Message);
+                        ActionCompleted("ACD: " + service.ServiceName + "/" + slot, "Failed downloading package", ToolTipIcon.Error);
                     }
                 }
                 catch (ApplicationException aex)
                 {
                     // We use ApplicationExceptions to indicate a custom error. All other errors will result in a ReportBug dialog.
-                    MessageBox.Show("Deployment failed: " + aex.Message);
+                    MessageBox.Show(this, "Package download failed: " + aex.Message);
                 }
             });
         }
 
-        private async Task<bool> CheckAndChoosePackageDownloadLocation()
+        private bool CheckAndChoosePackageDownloadLocation()
         {
             if (string.IsNullOrEmpty(Configuration.Instance.PackageDownloadPath) || !Directory.Exists(Configuration.Instance.PackageDownloadPath))
             {
-                await ChoosePackageDownloadLocation();
+                ChoosePackageDownloadLocation();
             }
 
             if (string.IsNullOrEmpty(Configuration.Instance.PackageDownloadPath) || !Directory.Exists(Configuration.Instance.PackageDownloadPath))
@@ -534,7 +558,7 @@ namespace AzureCloudserviceDeployer
             return true;
         }
 
-        private async Task ChoosePackageDownloadLocation()
+        private void ChoosePackageDownloadLocation()
         {
             var dialog = new FolderBrowserDialog();
             dialog.Description = "Select a location to download packages to";
@@ -546,14 +570,62 @@ namespace AzureCloudserviceDeployer
             Configuration.Instance.Save();
         }
 
-        private async void HandleConfigureDownloadPathOptionClicked(object sender, EventArgs e)
+        private void HandleConfigureDownloadPathOptionClicked(object sender, EventArgs e)
         {
-            await ChoosePackageDownloadLocation();
+            ChoosePackageDownloadLocation();
         }
 
         private void HandleSubmitFeedbackClicked(object sender, EventArgs e)
         {
             new FeedbackForm().ShowDialog(this);
+        }
+
+        private void HandleCloudserviceChanged(object sender, EventArgs e)
+        {
+            ClearAllSelectedFiles();
+        }
+
+        private void HandlePackagestorageChanged(object sender, EventArgs e)
+        {
+            ClearAllSelectedFiles();
+        }
+
+        private void HandleSlotChanged(object sender, EventArgs e)
+        {
+            ClearAllSelectedFiles();
+        }
+
+        private void ActionCompleted(string title, string message, ToolTipIcon icon)
+        {
+            if (title == null)
+                title = AppVersion.AppName;
+
+            if (Configuration.Instance.FlashWindowWhenDone)
+            {
+                FlashWindow.Flash(this);
+            }
+
+            if (Configuration.Instance.NotifyWhenDone)
+            {
+                notifyIcon1.Icon = Icon;
+                notifyIcon1.Visible = true;
+                notifyIcon1.ShowBalloonTip(5000, title, message, icon);
+                notifyIcon1.Visible = false;
+            }
+        }
+
+        private void HandleFlashApplicationWhenDoneClicked(object sender, EventArgs e)
+        {
+            flashApplicationToolStripMenuItem.Checked = !flashApplicationToolStripMenuItem.Checked;
+            Configuration.Instance.FlashWindowWhenDone = flashApplicationToolStripMenuItem.Checked;
+            Configuration.Instance.Save();
+        }
+
+        private void HandleShowNotificationWhenDoneClicked(object sender, EventArgs e)
+        {
+            showNotificationWhenDoneToolStripMenuItem.Checked = !showNotificationWhenDoneToolStripMenuItem.Checked;
+            Configuration.Instance.NotifyWhenDone = showNotificationWhenDoneToolStripMenuItem.Checked;
+            Configuration.Instance.Save();
         }
     }
 }

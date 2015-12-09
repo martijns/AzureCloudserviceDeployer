@@ -37,6 +37,9 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionConfigureDownloadPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.flashApplicationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showNotificationWhenDoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.changelogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.submitFeedbacknotYetAvailableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -84,6 +87,7 @@
             this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
@@ -127,7 +131,10 @@
             this.optionCleanupUnusedExtensionsToolStripMenuItem,
             this.toolStripSeparator1,
             this.optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem,
-            this.optionConfigureDownloadPathToolStripMenuItem});
+            this.optionConfigureDownloadPathToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.flashApplicationToolStripMenuItem,
+            this.showNotificationWhenDoneToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -159,6 +166,29 @@
             this.optionConfigureDownloadPathToolStripMenuItem.Size = new System.Drawing.Size(369, 22);
             this.optionConfigureDownloadPathToolStripMenuItem.Text = "Configure download path...";
             this.optionConfigureDownloadPathToolStripMenuItem.Click += new System.EventHandler(this.HandleConfigureDownloadPathOptionClicked);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(366, 6);
+            // 
+            // flashApplicationToolStripMenuItem
+            // 
+            this.flashApplicationToolStripMenuItem.Checked = true;
+            this.flashApplicationToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.flashApplicationToolStripMenuItem.Name = "flashApplicationToolStripMenuItem";
+            this.flashApplicationToolStripMenuItem.Size = new System.Drawing.Size(369, 22);
+            this.flashApplicationToolStripMenuItem.Text = "Flash application when done";
+            this.flashApplicationToolStripMenuItem.Click += new System.EventHandler(this.HandleFlashApplicationWhenDoneClicked);
+            // 
+            // showNotificationWhenDoneToolStripMenuItem
+            // 
+            this.showNotificationWhenDoneToolStripMenuItem.Checked = true;
+            this.showNotificationWhenDoneToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showNotificationWhenDoneToolStripMenuItem.Name = "showNotificationWhenDoneToolStripMenuItem";
+            this.showNotificationWhenDoneToolStripMenuItem.Size = new System.Drawing.Size(369, 22);
+            this.showNotificationWhenDoneToolStripMenuItem.Text = "Show notification when done";
+            this.showNotificationWhenDoneToolStripMenuItem.Click += new System.EventHandler(this.HandleShowNotificationWhenDoneClicked);
             // 
             // helpToolStripMenuItem
             // 
@@ -456,6 +486,7 @@
             this.cbSlot.Name = "cbSlot";
             this.cbSlot.Size = new System.Drawing.Size(283, 21);
             this.cbSlot.TabIndex = 15;
+            this.cbSlot.SelectedIndexChanged += new System.EventHandler(this.HandleSlotChanged);
             // 
             // lblSelectedDiag
             // 
@@ -558,6 +589,7 @@
             this.cbPackageStorage.Name = "cbPackageStorage";
             this.cbPackageStorage.Size = new System.Drawing.Size(283, 21);
             this.cbPackageStorage.TabIndex = 4;
+            this.cbPackageStorage.SelectedIndexChanged += new System.EventHandler(this.HandlePackagestorageChanged);
             // 
             // cbCloudservices
             // 
@@ -567,6 +599,7 @@
             this.cbCloudservices.Name = "cbCloudservices";
             this.cbCloudservices.Size = new System.Drawing.Size(283, 21);
             this.cbCloudservices.TabIndex = 3;
+            this.cbCloudservices.SelectedIndexChanged += new System.EventHandler(this.HandleCloudserviceChanged);
             // 
             // label3
             // 
@@ -646,6 +679,11 @@
             this.toolTip1.ShowAlways = true;
             this.toolTip1.UseAnimation = false;
             this.toolTip1.UseFading = false;
+            // 
+            // notifyIcon1
+            // 
+            this.notifyIcon1.Text = "AzureCloudserviceDeployer";
+            this.notifyIcon1.Visible = true;
             // 
             // MainForm
             // 
@@ -739,6 +777,10 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem optionConfigureDownloadPathToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem flashApplicationToolStripMenuItem;
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.ToolStripMenuItem showNotificationWhenDoneToolStripMenuItem;
     }
 }
 

@@ -32,5 +32,11 @@ namespace AzureCloudserviceDeployer
 
         [XmlElement]
         public string PackageDownloadPath { get; set; }
+
+        [XmlElement]
+        public bool FlashWindowWhenDone { get; set; } = true;
+
+        [XmlElement]
+        public bool NotifyWhenDone { get; set; } = true;
     }
 }

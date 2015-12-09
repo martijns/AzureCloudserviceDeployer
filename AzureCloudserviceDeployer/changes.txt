@@ -1,4 +1,12 @@
-﻿2015-12-03:
+﻿2015-12-09:
+- NEW: Clear selected files when changing cloudservice, package or slot
+- NEW: Flash window when action completes (enabled by default)
+- NEW: Show notification when action completes (enabled by default)
+- FIX: Prevent drag/drop of files during an operation
+- FIX: Keep the same internal deployment name when using DeleteAndCreateDeployment if an existing deployment exists
+- CHG: Warn when not started as clickonce.
+
+2015-12-03:
 - NEW: Submit feedback via the Help -> Submit feedback button
 - NEW: Download existing deployment package, including diagnostics if applicable. The download path is saved in configuration and can be changed via the Options menu.
 - NEW: Added option to automatically download packages before deploying, if an existing deployment exists. Not enabled by default.

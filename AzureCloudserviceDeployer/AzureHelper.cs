@@ -37,7 +37,7 @@ namespace AzureCloudserviceDeployer
     {
         private static ILog Logger = LogManager.GetLogger(typeof(AzureHelper));
 
-        public async static Task<AuthenticationResult> GetAuthentication(string tenantId = null, bool forceRefresh = false)
+        public static AuthenticationResult GetAuthentication(string tenantId = null, bool forceRefresh = false)
         {
             var login = ConfigurationManager.AppSettings["login"];
             tenantId = tenantId ?? ConfigurationManager.AppSettings["tenantId"]; // Use the tenant of the selected subscription, or the default
@@ -52,33 +52,33 @@ namespace AzureCloudserviceDeployer
             return result;
         }
 
-        public async static Task<TokenCloudCredentials> GetCredentialsAsync(SubscriptionListOperationResponse.Subscription subscription = null)
+        public static TokenCloudCredentials GetCredentialsAsync(SubscriptionListOperationResponse.Subscription subscription = null)
         {
             TokenCloudCredentials token = null;
             if (subscription == null)
-                token = new TokenCloudCredentials((await GetAuthentication()).AccessToken);
+                token = new TokenCloudCredentials((GetAuthentication()).AccessToken);
             else
-                token = new TokenCloudCredentials(subscription.SubscriptionId, (await GetAuthentication(subscription.ActiveDirectoryTenantId)).AccessToken);
+                token = new TokenCloudCredentials(subscription.SubscriptionId, (GetAuthentication(subscription.ActiveDirectoryTenantId)).AccessToken);
             return token;
         }
 
         public static async Task<SubscriptionListOperationResponse> GetSubscriptionsAsync()
         {
-            var subscriptionClient = new SubscriptionClient(await GetCredentialsAsync());
+            var subscriptionClient = new SubscriptionClient(GetCredentialsAsync());
             Logger.Info("Retrieving subscriptions...");
             return await subscriptionClient.Subscriptions.ListAsync();
         }
 
         public static async Task<HostedServiceListResponse> GetCloudservicesAsync(SubscriptionListOperationResponse.Subscription subscription)
         {
-            var computeClient = new ComputeManagementClient(await GetCredentialsAsync(subscription));
+            var computeClient = new ComputeManagementClient(GetCredentialsAsync(subscription));
             Logger.Info("Retrieving hosted services...");
             return await computeClient.HostedServices.ListAsync();
         }
 
         public static async Task<StorageAccountListResponse> GetStorageAccountsAsync(SubscriptionListOperationResponse.Subscription subscription)
         {
-            var storageClient = new StorageManagementClient(await GetCredentialsAsync(subscription));
+            var storageClient = new StorageManagementClient(GetCredentialsAsync(subscription));
             Logger.Info("Retrieving storage accounts...");
             return await storageClient.StorageAccounts.ListAsync();
         }
@@ -89,8 +89,8 @@ namespace AzureCloudserviceDeployer
             bool cleanupUnusedExtensions)
         {
             Logger.InfoFormat("Preparing for deployment of {0}...", service.ServiceName);
-            var computeClient = new ComputeManagementClient(await GetCredentialsAsync(subscription));
-            var storageClient = new StorageManagementClient(await GetCredentialsAsync(subscription));
+            var computeClient = new ComputeManagementClient(GetCredentialsAsync(subscription));
+            var storageClient = new StorageManagementClient(GetCredentialsAsync(subscription));
 
             // Load csdef
             var csCfg = File.ReadAllText(pathToCscfg);
@@ -110,6 +110,7 @@ namespace AzureCloudserviceDeployer
                 await containerRef.CreateIfNotExistsAsync();
             }
             var filename = service.ServiceName + "-" + slot.ToString() + ".cspkg";
+
             var blobRef = containerRef.GetBlockBlobReference(filename);
             Logger.InfoFormat("Uploading package to {0}...", blobRef.Uri);
             await blobRef.UploadFromFileAsync(pathToCspkg, FileMode.Open);
@@ -226,9 +227,14 @@ namespace AzureCloudserviceDeployer
                         // Is there a deployment in this slot?
                         Logger.InfoFormat("Fetching detailed service information...");
                         var detailedService = await computeClient.HostedServices.GetDetailedAsync(service.ServiceName);
-                        if (detailedService.Deployments.Where(s => s.DeploymentSlot == slot).Any())
+                        var currentDeployment = detailedService.Deployments.Where(s => s.DeploymentSlot == slot).FirstOrDefault();
+                        if (currentDeployment != null)
                         {
-                            // Yes, there is. Delete it.
+                            // Yes, there is. Save the deployment name for the recreate. This is to increase compatibility with
+                            // cloud service monitoring tools.
+                            deployParams.Name = currentDeployment.Name;
+
+                            // Delete it.
                             Logger.InfoFormat("Deployment in {0} slot exists, deleting...", slot);
                             var deleteOperation = await computeClient.Deployments.DeleteBySlotAsync(service.ServiceName, slot);
                             var deleteStatus = await computeClient.GetOperationStatusAsync(deleteOperation.RequestId);
@@ -259,7 +265,8 @@ namespace AzureCloudserviceDeployer
                         // Is there a deployment in this slot?
                         Logger.InfoFormat("Fetching detailed service information...");
                         var detailedService = await computeClient.HostedServices.GetDetailedAsync(service.ServiceName);
-                        if (detailedService.Deployments.Where(s => s.DeploymentSlot == slot).Any())
+                        var currentDeployment = detailedService.Deployments.Where(s => s.DeploymentSlot == slot).FirstOrDefault();
+                        if (currentDeployment != null)
                         {
                             // Yes, there is. Upgrade it.
                             Logger.InfoFormat("Deployment in {0} slot exists, upgrading...", slot);
@@ -334,7 +341,7 @@ namespace AzureCloudserviceDeployer
                     {
                         await computeClient.HostedServices.DeleteExtensionAsync(service.ServiceName, currentDiagExtension.Id);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         Logger.ErrorFormat("Couldn't delete extension {0}, might be in use...", currentDiagExtension.Id);
                     }
@@ -345,8 +352,8 @@ namespace AzureCloudserviceDeployer
         public static async Task DownloadDeploymentAsync(SubscriptionListOperationResponse.Subscription subscription, HostedServiceListResponse.HostedService service, DeploymentSlot slot, StorageAccount temporaryStorage, string downloadToPath, bool warnInsteadOfThrow = false)
         {
             Logger.InfoFormat("Preparing to download {0}/{1}...", service.ServiceName, slot);
-            var computeClient = new ComputeManagementClient(await GetCredentialsAsync(subscription));
-            var storageClient = new StorageManagementClient(await GetCredentialsAsync(subscription));
+            var computeClient = new ComputeManagementClient(GetCredentialsAsync(subscription));
+            var storageClient = new StorageManagementClient(GetCredentialsAsync(subscription));
 
             Logger.InfoFormat("Checking existing deployment in {0} slot...", slot);
             var detailedService = await computeClient.HostedServices.GetDetailedAsync(service.ServiceName);
