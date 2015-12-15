@@ -1,4 +1,10 @@
-﻿2015-12-09:
+﻿2015-12-14:
+- FIX: Allow the API to refresh the token if needed (should prevent "failed to authenticate the request" messages when using the tool for longer periods of time)
+- NEW: Asynchronously wait for an operation, showing (a form of) progress in the log window. Repeating logmessages are not duplicated, but instead a count is added to the end.
+- CHG: Renamed "Upgrade preference" to "Deployment type" and updated the descriptions to be more accurate
+- NEW: New deployment type to allow creating a stopped deployment
+
+2015-12-09:
 - NEW: Clear selected files when changing cloudservice, package or slot
 - NEW: Flash window when action completes (enabled by default)
 - NEW: Show notification when action completes (enabled by default)

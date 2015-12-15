@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using log4net.Core;
 using log4net;
+using System.Runtime.CompilerServices;
 
 namespace AzureCloudserviceDeployer
 {
@@ -33,7 +34,7 @@ namespace AzureCloudserviceDeployer
 
         public MainForm()
         {
-            Logger.Debug("MainForm");
+            LogMethodEntry();
             InitializeComponent();
             lbLog.DrawMode = DrawMode.OwnerDrawFixed;
             lbLog.DrawItem += HandleDrawLogItem;
@@ -48,7 +49,7 @@ namespace AzureCloudserviceDeployer
 
         private void HandleMainformShown(object sender, EventArgs e)
         {
-            Logger.Debug("HandleMainformShown");
+            LogMethodEntry();
             UpdateFormState();
             AppVersion.CheckForUpdateAsync();
             lblLabelPreview.Text = GetRenderedLabel();
@@ -56,19 +57,19 @@ namespace AzureCloudserviceDeployer
 
         private void HandleChangelogClicked(object sender, EventArgs e)
         {
-            Logger.Debug("HandleChangelogClicked");
+            LogMethodEntry();
             AppVersion.DisplayChanges();
         }
 
         private void HandleAboutClicked(object sender, EventArgs e)
         {
-            Logger.Debug("HandleAboutClicked");
+            LogMethodEntry();
             AppVersion.DisplayAbout();
         }
 
         private async void HandleAuthenticateClicked(object sender, EventArgs e)
         {
-            Logger.Debug("HandleAuthenticateClicked");
+            LogMethodEntry();
             await PerformWorkAsync(this, null, async () =>
             {
                 AuthenticationResult auth = null;
@@ -90,13 +91,13 @@ namespace AzureCloudserviceDeployer
 
         private void HandleExitClicked(object sender, EventArgs e)
         {
-            Logger.Debug("HandleExitClicked");
+            LogMethodEntry();
             Close();
         }
 
         private async Task UpdateSubscriptions()
         {
-            Logger.Debug("UpdateSubscriptions");
+            LogMethodEntry();
             await PerformWorkAsync(this, null, async () =>
             {
                 var subscriptions = await AzureHelper.GetSubscriptionsAsync();
@@ -114,7 +115,7 @@ namespace AzureCloudserviceDeployer
 
         private async void HandleSubscriptionIndexChanged(object sender, EventArgs e)
         {
-            Logger.Debug("HandleSubscriptionIndexChanged");
+            LogMethodEntry();
             await PerformWorkAsync(this, null, async () =>
             {
                 var subscription = cbSubscriptions.SelectedItem as SubscriptionListOperationResponse.Subscription;
@@ -155,6 +156,7 @@ namespace AzureCloudserviceDeployer
                 cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.UpgradeWithUpdateDomains, UpgradePreference.UpgradeWithUpdateDomains.GetDescription()));
                 cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.UpgradeSimultaneously, UpgradePreference.UpgradeSimultaneously.GetDescription()));
                 cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.DeleteAndCreateDeployment, UpgradePreference.DeleteAndCreateDeployment.GetDescription()));
+                cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.DeleteAndCreateDeploymentInitiallyStopped, UpgradePreference.DeleteAndCreateDeploymentInitiallyStopped.GetDescription()));
                 cbUpgradePreference.ValueMember = "Key";
                 cbUpgradePreference.DisplayMember = "Value";
                 cbUpgradePreference.SelectedIndex = 0;
@@ -175,6 +177,7 @@ namespace AzureCloudserviceDeployer
 
         private void UpdateFormState()
         {
+            LogMethodEntry();
             UpdateControlEnabledState(cbSubscriptions, _authenticated);
             var state = _authenticated && cbSubscriptions.SelectedItem != null;
             UpdateControlEnabledState(cbCloudservices, state);
@@ -197,7 +200,7 @@ namespace AzureCloudserviceDeployer
 
         private string SelectFile(string filter)
         {
-            Logger.Debug("SelectFile");
+            LogMethodEntry();
             var dialog = new OpenFileDialog();
             dialog.CheckFileExists = true;
             dialog.Filter = filter;
@@ -211,25 +214,25 @@ namespace AzureCloudserviceDeployer
 
         private void HandleSelectCloudPackage(object sender, EventArgs e)
         {
-            Logger.Debug("HandleSelectCloudPackage");
+            LogMethodEntry();
             UpdateSelectedFiles(SelectFile("Cloud Package|*.cspkg|All Files|*.*"));
         }
 
         private void HandleSelectCloudConfig(object sender, EventArgs e)
         {
-            Logger.Debug("HandleSelectCloudConfig");
+            LogMethodEntry();
             UpdateSelectedFiles(SelectFile("Cloud Config|*.cscfg|All Files|*.*"));
         }
 
         private void HandleSelectCloudDiag(object sender, EventArgs e)
         {
-            Logger.Debug("HandleSelectCloudDiag");
+            LogMethodEntry();
             UpdateSelectedFiles(SelectFile("Cloud Diag Config|*.PubConfig.xml|All Files|*.*"));
         }
 
         private void UpdateSelectedFiles(string path)
         {
-            Logger.Debug("UpdateSelectedFiles");
+            LogMethodEntry();
             if (path == null)
                 return;
             if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
@@ -311,6 +314,9 @@ namespace AzureCloudserviceDeployer
 
         #region Logstuff
 
+        private string _LastLogMessage = null;
+        private int _LastLogMessageCount = 0;
+
         private void AddToLog(LogItem logitem)
         {
             if (lbLog.InvokeRequired)
@@ -318,6 +324,23 @@ namespace AzureCloudserviceDeployer
                 lbLog.Invoke((Action<LogItem>)AddToLog, logitem);
                 return;
             }
+
+            if (_LastLogMessage != logitem.Message)
+            {
+                _LastLogMessage = logitem.Message;
+                _LastLogMessageCount = 1;
+            }
+            else
+            {
+                _LastLogMessageCount++;
+            }
+
+            if (_LastLogMessageCount > 1)
+            {
+                logitem.Message += " (message repeated " + _LastLogMessageCount + " times)";
+                lbLog.Items.RemoveAt(0);
+            }
+
             lbLog.Items.Insert(0, logitem);
             while (lbLog.Items.Count > 250)
             {
@@ -413,6 +436,7 @@ namespace AzureCloudserviceDeployer
 
         private void HandleLogCopyClicked(object sender, EventArgs e)
         {
+            LogMethodEntry();
             if (lbLog.SelectedItems.Count == 0)
                 return;
 
@@ -424,6 +448,7 @@ namespace AzureCloudserviceDeployer
 
         private void HandleDragEnter(object sender, DragEventArgs e)
         {
+            LogMethodEntry();
             if (IsBusy)
                 return;
 
@@ -432,6 +457,7 @@ namespace AzureCloudserviceDeployer
 
         private void HandleDragDrop(object sender, DragEventArgs e)
         {
+            LogMethodEntry();
             if (IsBusy)
                 return;
 
@@ -442,6 +468,7 @@ namespace AzureCloudserviceDeployer
 
         private void HandleTooltipClick(object sender, EventArgs e)
         {
+            LogMethodEntry();
             var control = sender as Control;
             if (control == null)
                 return;
@@ -452,6 +479,7 @@ namespace AzureCloudserviceDeployer
 
         private void ClearAllSelectedFiles()
         {
+            LogMethodEntry();
             HandleClearDiagConfig(this, EventArgs.Empty);
             HandleClearCloudConfig(this, EventArgs.Empty);
             HandleClearCloudPackage(this, EventArgs.Empty);
@@ -459,20 +487,32 @@ namespace AzureCloudserviceDeployer
 
         private void HandleClearDiagConfig(object sender, EventArgs e)
         {
-            _selectedDiag = null;
-            lblSelectedDiag.Text = "<cleared>";
+            LogMethodEntry();
+            if (_selectedDiag != null)
+            {
+                _selectedDiag = null;
+                lblSelectedDiag.Text = "<cleared>";
+            }
         }
 
         private void HandleClearCloudConfig(object sender, EventArgs e)
         {
-            _selectedConfig = null;
-            lblSelectedConfig.Text = "<cleared>";
+            Logger.Debug("HandleClearCloudConfig");
+            if (_selectedConfig != null)
+            {
+                _selectedConfig = null;
+                lblSelectedConfig.Text = "<cleared>";
+            }
         }
 
         private void HandleClearCloudPackage(object sender, EventArgs e)
         {
-            _selectedPackage = null;
-            lblSelectedPackage.Text = "<cleared>";
+            LogMethodEntry();
+            if (_selectedPackage != null)
+            {
+                _selectedPackage = null;
+                lblSelectedPackage.Text = "<cleared>";
+            }
         }
 
         private string GetRenderedLabel()
@@ -491,6 +531,7 @@ namespace AzureCloudserviceDeployer
 
         private void HandleOptionCleanupUnusedDiagnosticsExtensions(object sender, EventArgs e)
         {
+            LogMethodEntry();
             optionCleanupUnusedExtensionsToolStripMenuItem.Checked = !optionCleanupUnusedExtensionsToolStripMenuItem.Checked;
             Configuration.Instance.CleanupUnusedExtensions = optionCleanupUnusedExtensionsToolStripMenuItem.Checked;
             Configuration.Instance.Save();
@@ -498,6 +539,7 @@ namespace AzureCloudserviceDeployer
 
         private void HandleAutoDownloadExistingPackageOptionClicked(object sender, EventArgs e)
         {
+            LogMethodEntry();
             optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Checked = !optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Checked;
             Configuration.Instance.AutoDownloadPackageBeforeDeploy = optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem.Checked;
             Configuration.Instance.Save();
@@ -505,7 +547,7 @@ namespace AzureCloudserviceDeployer
 
         private async void HandleDownloadPackageClicked(object sender, EventArgs e)
         {
-            Logger.Debug("HandleDownloadPackageClicked");
+            LogMethodEntry();
             await PerformWorkAsync(this, null, async () =>
             {
                 var subscription = cbSubscriptions.SelectedItem as SubscriptionListOperationResponse.Subscription;
@@ -546,6 +588,7 @@ namespace AzureCloudserviceDeployer
 
         private bool CheckAndChoosePackageDownloadLocation()
         {
+            LogMethodEntry();
             if (string.IsNullOrEmpty(Configuration.Instance.PackageDownloadPath) || !Directory.Exists(Configuration.Instance.PackageDownloadPath))
             {
                 ChoosePackageDownloadLocation();
@@ -560,6 +603,7 @@ namespace AzureCloudserviceDeployer
 
         private void ChoosePackageDownloadLocation()
         {
+            LogMethodEntry();
             var dialog = new FolderBrowserDialog();
             dialog.Description = "Select a location to download packages to";
             var result = dialog.ShowDialog(this);
@@ -572,31 +616,37 @@ namespace AzureCloudserviceDeployer
 
         private void HandleConfigureDownloadPathOptionClicked(object sender, EventArgs e)
         {
+            LogMethodEntry();
             ChoosePackageDownloadLocation();
         }
 
         private void HandleSubmitFeedbackClicked(object sender, EventArgs e)
         {
+            LogMethodEntry();
             new FeedbackForm().ShowDialog(this);
         }
 
         private void HandleCloudserviceChanged(object sender, EventArgs e)
         {
+            LogMethodEntry();
             ClearAllSelectedFiles();
         }
 
         private void HandlePackagestorageChanged(object sender, EventArgs e)
         {
+            LogMethodEntry();
             ClearAllSelectedFiles();
         }
 
         private void HandleSlotChanged(object sender, EventArgs e)
         {
+            LogMethodEntry();
             ClearAllSelectedFiles();
         }
 
         private void ActionCompleted(string title, string message, ToolTipIcon icon)
         {
+            LogMethodEntry();
             if (title == null)
                 title = AppVersion.AppName;
 
@@ -616,6 +666,7 @@ namespace AzureCloudserviceDeployer
 
         private void HandleFlashApplicationWhenDoneClicked(object sender, EventArgs e)
         {
+            LogMethodEntry();
             flashApplicationToolStripMenuItem.Checked = !flashApplicationToolStripMenuItem.Checked;
             Configuration.Instance.FlashWindowWhenDone = flashApplicationToolStripMenuItem.Checked;
             Configuration.Instance.Save();
@@ -623,9 +674,15 @@ namespace AzureCloudserviceDeployer
 
         private void HandleShowNotificationWhenDoneClicked(object sender, EventArgs e)
         {
+            LogMethodEntry();
             showNotificationWhenDoneToolStripMenuItem.Checked = !showNotificationWhenDoneToolStripMenuItem.Checked;
             Configuration.Instance.NotifyWhenDone = showNotificationWhenDoneToolStripMenuItem.Checked;
             Configuration.Instance.Save();
+        }
+
+        private void LogMethodEntry([CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
+        {
+            Logger.DebugFormat("=> {0}.{1}:{2}", Path.GetFileNameWithoutExtension(file), member, line);
         }
     }
 }

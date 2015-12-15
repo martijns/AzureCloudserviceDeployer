@@ -25,17 +25,21 @@ namespace AzureCloudserviceDeployer
 {
     public enum UpgradePreference
     {
-        [Description("Delete existing deployment, then create a new one")]
-        DeleteAndCreateDeployment = 1,
-        [Description("Upgrade deployment respecting update domains")]
-        UpgradeWithUpdateDomains = 2,
-        [Description("Upgrade deployment with all update domains simultaneously")]
-        UpgradeSimultaneously = 3
+        [Description("Delete/create new deployment")]
+        DeleteAndCreateDeployment,
+        [Description("Delete/create new deployment (stopped)")]
+        DeleteAndCreateDeploymentInitiallyStopped,
+        [Description("Upgrade (or create) respecting update domains")]
+        UpgradeWithUpdateDomains,
+        [Description("Upgrade (or create) with all update domains simultaneously")]
+        UpgradeSimultaneously
     }
 
     public class AzureHelper
     {
         private static ILog Logger = LogManager.GetLogger(typeof(AzureHelper));
+
+        private static Dictionary<string, AuthenticationContext> _authenticationContexts = new Dictionary<string, AuthenticationContext>();
 
         public static AuthenticationResult GetAuthentication(string tenantId = null, bool forceRefresh = false)
         {
@@ -47,38 +51,53 @@ namespace AzureCloudserviceDeployer
 
             var prompt = forceRefresh ? PromptBehavior.RefreshSession : PromptBehavior.Auto;
 
-            var context = new AuthenticationContext(string.Format(login, tenantId));
+            var context = GetAuthenticationContext(string.Format(login, tenantId), forceRefresh);
             var result = context.AcquireToken(apiEndpoint, clientId, new Uri(redirectUri), prompt);
+            Logger.Debug("Token for authority '" + context.Authority + "' valid until: " + result.ExpiresOn);
             return result;
         }
 
-        public static TokenCloudCredentials GetCredentialsAsync(SubscriptionListOperationResponse.Subscription subscription = null)
+        private static AuthenticationContext GetAuthenticationContext(string authority, bool forceRefresh)
+        {
+            lock (_authenticationContexts)
+            {
+                if (forceRefresh)
+                    _authenticationContexts.Clear();
+
+                if (_authenticationContexts.ContainsKey(authority))
+                    return _authenticationContexts[authority];
+                _authenticationContexts.Add(authority, new AuthenticationContext(authority));
+                return _authenticationContexts[authority];
+            }
+        }
+
+        public static TokenCloudCredentials GetCredentials(SubscriptionListOperationResponse.Subscription subscription = null)
         {
             TokenCloudCredentials token = null;
             if (subscription == null)
-                token = new TokenCloudCredentials((GetAuthentication()).AccessToken);
+                token = new TokenCloudCredentials(GetAuthentication().AccessToken);
             else
-                token = new TokenCloudCredentials(subscription.SubscriptionId, (GetAuthentication(subscription.ActiveDirectoryTenantId)).AccessToken);
+                token = new TokenCloudCredentials(subscription.SubscriptionId, GetAuthentication(subscription.ActiveDirectoryTenantId).AccessToken);
             return token;
         }
 
         public static async Task<SubscriptionListOperationResponse> GetSubscriptionsAsync()
         {
-            var subscriptionClient = new SubscriptionClient(GetCredentialsAsync());
+            var subscriptionClient = new SubscriptionClient(GetCredentials());
             Logger.Info("Retrieving subscriptions...");
             return await subscriptionClient.Subscriptions.ListAsync();
         }
 
         public static async Task<HostedServiceListResponse> GetCloudservicesAsync(SubscriptionListOperationResponse.Subscription subscription)
         {
-            var computeClient = new ComputeManagementClient(GetCredentialsAsync(subscription));
+            var computeClient = new ComputeManagementClient(GetCredentials(subscription));
             Logger.Info("Retrieving hosted services...");
             return await computeClient.HostedServices.ListAsync();
         }
 
         public static async Task<StorageAccountListResponse> GetStorageAccountsAsync(SubscriptionListOperationResponse.Subscription subscription)
         {
-            var storageClient = new StorageManagementClient(GetCredentialsAsync(subscription));
+            var storageClient = new StorageManagementClient(GetCredentials(subscription));
             Logger.Info("Retrieving storage accounts...");
             return await storageClient.StorageAccounts.ListAsync();
         }
@@ -89,8 +108,9 @@ namespace AzureCloudserviceDeployer
             bool cleanupUnusedExtensions)
         {
             Logger.InfoFormat("Preparing for deployment of {0}...", service.ServiceName);
-            var computeClient = new ComputeManagementClient(GetCredentialsAsync(subscription));
-            var storageClient = new StorageManagementClient(GetCredentialsAsync(subscription));
+            var credentials = GetCredentials(subscription);
+            var computeClient = new ComputeManagementClient(credentials);
+            var storageClient = new StorageManagementClient(credentials);
 
             // Load csdef
             var csCfg = File.ReadAllText(pathToCscfg);
@@ -176,7 +196,7 @@ namespace AzureCloudserviceDeployer
             {
                 var diagnosticsId = "acd-diagnostics-" + Guid.NewGuid().ToString("N");
                 Logger.InfoFormat("Adding new diagnostics extension {0}...", diagnosticsId);
-                var createExtensionOperation = await computeClient.HostedServices.AddExtensionAsync(service.ServiceName, new HostedServiceAddExtensionParameters()
+                var createExtensionOperation = await computeClient.HostedServices.BeginAddingExtensionAsync(service.ServiceName, new HostedServiceAddExtensionParameters()
                 {
                     ProviderNamespace = availableDiagnosticsExtension.ProviderNameSpace,
                     Type = availableDiagnosticsExtension.Type,
@@ -185,13 +205,7 @@ namespace AzureCloudserviceDeployer
                     PublicConfiguration = diagConfig,
                     PrivateConfiguration = privateDiagConfig
                 });
-                var createExtensionStatus = await computeClient.GetOperationStatusAsync(createExtensionOperation.RequestId);
-                while (createExtensionStatus.Status == OperationStatus.InProgress)
-                {
-                    Logger.InfoFormat("Waiting for operation to finish...");
-                    await Task.Delay(5000);
-                    createExtensionStatus = await computeClient.GetOperationStatusAsync(createExtensionOperation.RequestId);
-                }
+                await WaitForOperationAsync(subscription, computeClient, createExtensionOperation.RequestId);
 
                 // Extension configuration
                 extensionConfiguration.AllRoles.Add(new ExtensionConfiguration.Extension
@@ -222,8 +236,13 @@ namespace AzureCloudserviceDeployer
 
             switch (upgradePreference)
             {
+                case UpgradePreference.DeleteAndCreateDeploymentInitiallyStopped:
                 case UpgradePreference.DeleteAndCreateDeployment:
                     {
+                        // In the case of initially stopped, set StartDeployment to false (we default to 'true' above)
+                        if (upgradePreference == UpgradePreference.DeleteAndCreateDeploymentInitiallyStopped)
+                            deployParams.StartDeployment = false;
+
                         // Is there a deployment in this slot?
                         Logger.InfoFormat("Fetching detailed service information...");
                         var detailedService = await computeClient.HostedServices.GetDetailedAsync(service.ServiceName);
@@ -236,26 +255,14 @@ namespace AzureCloudserviceDeployer
 
                             // Delete it.
                             Logger.InfoFormat("Deployment in {0} slot exists, deleting...", slot);
-                            var deleteOperation = await computeClient.Deployments.DeleteBySlotAsync(service.ServiceName, slot);
-                            var deleteStatus = await computeClient.GetOperationStatusAsync(deleteOperation.RequestId);
-                            while (deleteStatus.Status == OperationStatus.InProgress)
-                            {
-                                Logger.InfoFormat("Waiting for operation to finish...");
-                                await Task.Delay(5000);
-                                deleteStatus = await computeClient.GetOperationStatusAsync(deleteOperation.RequestId);
-                            }
+                            var deleteOperation = await computeClient.Deployments.BeginDeletingBySlotAsync(service.ServiceName, slot);
+                            await WaitForOperationAsync(subscription, computeClient, deleteOperation.RequestId);
                         }
 
                         // Create a new deployment in this slot
                         Logger.InfoFormat("Creating deployment in {0} slot...", slot);
-                        var createOperation = await computeClient.Deployments.CreateAsync(service.ServiceName, slot, deployParams);
-                        var createStatus = await computeClient.GetOperationStatusAsync(createOperation.RequestId);
-                        while (createStatus.Status == OperationStatus.InProgress)
-                        {
-                            Logger.InfoFormat("Waiting for operation to finish...");
-                            await Task.Delay(5000);
-                            createStatus = await computeClient.GetOperationStatusAsync(createOperation.RequestId);
-                        }
+                        var createOperation = await computeClient.Deployments.BeginCreatingAsync(service.ServiceName, slot, deployParams);
+                        await WaitForOperationAsync(subscription, computeClient, createOperation.RequestId);
                     }
 
                     break;
@@ -270,27 +277,15 @@ namespace AzureCloudserviceDeployer
                         {
                             // Yes, there is. Upgrade it.
                             Logger.InfoFormat("Deployment in {0} slot exists, upgrading...", slot);
-                            var upgradeOperation = await computeClient.Deployments.UpgradeBySlotAsync(service.ServiceName, slot, upgradeParams);
-                            var upgradeStatus = await computeClient.GetOperationStatusAsync(upgradeOperation.RequestId);
-                            while (upgradeStatus.Status == OperationStatus.InProgress)
-                            {
-                                Logger.InfoFormat("Waiting for operation to finish...");
-                                await Task.Delay(5000);
-                                upgradeStatus = await computeClient.GetOperationStatusAsync(upgradeOperation.RequestId);
-                            }
+                            var upgradeOperation = await computeClient.Deployments.BeginUpgradingBySlotAsync(service.ServiceName, slot, upgradeParams);
+                            await WaitForOperationAsync(subscription, computeClient, upgradeOperation.RequestId);
                         }
                         else
                         {
                             // No, there isn't. Create.
                             Logger.InfoFormat("No deployment in {0} slot yet, creating...", slot);
-                            var createOperation = await computeClient.Deployments.CreateAsync(service.ServiceName, slot, deployParams);
-                            var createStatus = await computeClient.GetOperationStatusAsync(createOperation.RequestId);
-                            while (createStatus.Status == OperationStatus.InProgress)
-                            {
-                                Logger.InfoFormat("Waiting for operation to finish...");
-                                await Task.Delay(5000);
-                                createStatus = await computeClient.GetOperationStatusAsync(createOperation.RequestId);
-                            }
+                            var createOperation = await computeClient.Deployments.BeginCreatingAsync(service.ServiceName, slot, deployParams);
+                            await WaitForOperationAsync(subscription, computeClient, createOperation.RequestId);
                         }
                     }
 
@@ -352,8 +347,8 @@ namespace AzureCloudserviceDeployer
         public static async Task DownloadDeploymentAsync(SubscriptionListOperationResponse.Subscription subscription, HostedServiceListResponse.HostedService service, DeploymentSlot slot, StorageAccount temporaryStorage, string downloadToPath, bool warnInsteadOfThrow = false)
         {
             Logger.InfoFormat("Preparing to download {0}/{1}...", service.ServiceName, slot);
-            var computeClient = new ComputeManagementClient(GetCredentialsAsync(subscription));
-            var storageClient = new StorageManagementClient(GetCredentialsAsync(subscription));
+            var computeClient = new ComputeManagementClient(GetCredentials(subscription));
+            var storageClient = new StorageManagementClient(GetCredentials(subscription));
 
             Logger.InfoFormat("Checking existing deployment in {0} slot...", slot);
             var detailedService = await computeClient.HostedServices.GetDetailedAsync(service.ServiceName);
@@ -401,16 +396,11 @@ namespace AzureCloudserviceDeployer
             await container.CreateIfNotExistsAsync();
 
             Logger.InfoFormat("Downloading package to storage account {0}...", temporaryStorage.Name);
-            var getPackageOperation = await computeClient.Deployments.GetPackageBySlotAsync(service.ServiceName, slot, new DeploymentGetPackageParameters
+            var getPackageOperation = await computeClient.Deployments.BeginGettingPackageBySlotAsync(service.ServiceName, slot, new DeploymentGetPackageParameters
             {
                 ContainerUri = container.Uri
             });
-            while (getPackageOperation.Status == OperationStatus.InProgress)
-            {
-                Logger.InfoFormat("Waiting for operation to finish...");
-                await Task.Delay(5000);
-                getPackageOperation = await computeClient.GetOperationStatusAsync(getPackageOperation.RequestId);
-            }
+            await WaitForOperationAsync(subscription, computeClient, getPackageOperation.RequestId);
 
             Logger.InfoFormat("Downloading from storage to {0}...", downloadToPath);
             var result = await container.ListBlobsSegmentedAsync(null);
@@ -434,6 +424,28 @@ namespace AzureCloudserviceDeployer
             await container.DeleteAsync();
 
             Logger.Info("Package download succesful");
+        }
+
+        private static async Task WaitForOperationAsync(SubscriptionListOperationResponse.Subscription subscription, ComputeManagementClient client, string requestId)
+        {
+            var statusResponse = await client.GetOperationStatusAsync(requestId);
+            while (statusResponse.Status == OperationStatus.InProgress)
+            {
+                Logger.InfoFormat("Waiting for operation to finish...");
+                await Task.Delay(5000);
+                RefreshCredentials(subscription, client.Credentials);
+                statusResponse = await client.GetOperationStatusAsync(requestId);
+            }
+        }
+
+        private static void RefreshCredentials(SubscriptionListOperationResponse.Subscription subscription, SubscriptionCloudCredentials credentials)
+        {
+            var tokenCloudCredentials = credentials as TokenCloudCredentials;
+            if (tokenCloudCredentials != null)
+            {
+                var newCredentials = GetCredentials(subscription);
+                tokenCloudCredentials.Token = newCredentials.Token;
+            }
         }
     }
 }

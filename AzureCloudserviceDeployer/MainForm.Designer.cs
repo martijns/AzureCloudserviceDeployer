@@ -465,9 +465,9 @@
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(9, 135);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(105, 13);
+            this.label9.Size = new System.Drawing.Size(89, 13);
             this.label9.TabIndex = 17;
-            this.label9.Text = "Upgrade preference:";
+            this.label9.Text = "Deployment type:";
             // 
             // label8
             // 
