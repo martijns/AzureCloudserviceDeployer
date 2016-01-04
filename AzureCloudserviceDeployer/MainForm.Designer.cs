@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -83,8 +84,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.cbSubscriptions = new System.Windows.Forms.ComboBox();
             this.lbLog = new System.Windows.Forms.ListBox();
-            this.lbLogContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
@@ -94,7 +93,6 @@
             this.gbQuickDeploy.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.lbLogContextMenu.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -631,7 +629,6 @@
             // 
             // lbLog
             // 
-            this.lbLog.ContextMenuStrip = this.lbLogContextMenu;
             this.lbLog.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lbLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbLog.FormattingEnabled = true;
@@ -643,21 +640,6 @@
             this.lbLog.Size = new System.Drawing.Size(607, 131);
             this.lbLog.TabIndex = 5;
             this.lbLog.Tag = "KEEP_ENABLED";
-            // 
-            // lbLogContextMenu
-            // 
-            this.lbLogContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.copyToolStripMenuItem});
-            this.lbLogContextMenu.Name = "lbLogContextMenu";
-            this.lbLogContextMenu.ShowImageMargin = false;
-            this.lbLogContextMenu.Size = new System.Drawing.Size(78, 26);
-            // 
-            // copyToolStripMenuItem
-            // 
-            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(77, 22);
-            this.copyToolStripMenuItem.Text = "Copy";
-            this.copyToolStripMenuItem.Click += new System.EventHandler(this.HandleLogCopyClicked);
             // 
             // groupBox3
             // 
@@ -696,6 +678,7 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
             this.Name = "MainForm";
@@ -713,7 +696,6 @@
             this.gbQuickDeploy.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.lbLogContextMenu.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -765,8 +747,6 @@
         private System.Windows.Forms.Button btnClearDiagConfig;
         private System.Windows.Forms.Button btnClearCloudConfig;
         private System.Windows.Forms.Button btnClearCloudPackage;
-        private System.Windows.Forms.ContextMenuStrip lbLogContextMenu;
-        private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
         private System.Windows.Forms.Label lblLabelPreview;
         private System.Windows.Forms.Label lblPreview;
         private System.Windows.Forms.PictureBox pictureBox2;

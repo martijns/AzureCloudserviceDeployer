@@ -23,7 +23,7 @@ using System.Runtime.CompilerServices;
 
 namespace AzureCloudserviceDeployer
 {
-    public partial class MainForm : BaseForm, IAppender
+    public partial class MainForm : AppForm
     {
         private static ILog Logger = LogManager.GetLogger(typeof(MainForm));
 
@@ -36,9 +36,7 @@ namespace AzureCloudserviceDeployer
         {
             LogMethodEntry();
             InitializeComponent();
-            lbLog.DrawMode = DrawMode.OwnerDrawFixed;
-            lbLog.DrawItem += HandleDrawLogItem;
-            ((Hierarchy)LogManager.GetRepository()).Root.AddAppender(this);
+            SetLoggingListBox(lbLog);
 
             // Load options from configuration
             optionCleanupUnusedExtensionsToolStripMenuItem.Checked = Configuration.Instance.CleanupUnusedExtensions;
@@ -312,140 +310,6 @@ namespace AzureCloudserviceDeployer
             });
         }
 
-        #region Logstuff
-
-        private string _LastLogMessage = null;
-        private int _LastLogMessageCount = 0;
-
-        private void AddToLog(LogItem logitem)
-        {
-            if (lbLog.InvokeRequired)
-            {
-                lbLog.Invoke((Action<LogItem>)AddToLog, logitem);
-                return;
-            }
-
-            if (_LastLogMessage != logitem.Message)
-            {
-                _LastLogMessage = logitem.Message;
-                _LastLogMessageCount = 1;
-            }
-            else
-            {
-                _LastLogMessageCount++;
-            }
-
-            if (_LastLogMessageCount > 1)
-            {
-                logitem.Message += " (message repeated " + _LastLogMessageCount + " times)";
-                lbLog.Items.RemoveAt(0);
-            }
-
-            lbLog.Items.Insert(0, logitem);
-            while (lbLog.Items.Count > 250)
-            {
-                lbLog.Items.RemoveAt(lbLog.Items.Count - 1);
-            }
-        }
-
-        private void HandleDrawLogItem(object sender, DrawItemEventArgs e)
-        {
-            ListBox lb = (ListBox)sender;
-            if (e.Index < 0 || e.Index >= lb.Items.Count)
-                return;
-
-            Color backColor = lb.BackColor;
-            LogItem li = lb.Items[e.Index] as LogItem;
-            if (li != null)
-            {
-                if (li.Level == Level.Warn)
-                    backColor = Color.Yellow;
-                if (li.Level == Level.Error)
-                    backColor = Color.LightPink;
-            }
-
-            if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
-            {
-                backColor = ChangeColorBrightness(backColor, -0.1f);
-            }
-
-            Graphics g = e.Graphics;
-
-            string msg = lb.Items[e.Index].ToString();
-
-            int hzSize = (int)g.MeasureString(msg, lb.Font).Width;
-            if (lb.HorizontalExtent < hzSize)
-                lb.HorizontalExtent = hzSize;
-
-            e.DrawBackground();
-            g.FillRectangle(new SolidBrush(backColor), e.Bounds);
-            g.DrawString(msg, e.Font, new SolidBrush(Color.Black), new PointF(e.Bounds.X, e.Bounds.Y));
-            e.DrawFocusRectangle();
-        }
-
-        /// <summary>
-        /// http://www.pvladov.com/2012/09/make-color-lighter-or-darker.html
-        /// </summary>
-        public static Color ChangeColorBrightness(Color color, float correctionFactor)
-        {
-            float red = (float)color.R;
-            float green = (float)color.G;
-            float blue = (float)color.B;
-
-            if (correctionFactor < 0)
-            {
-                correctionFactor = 1 + correctionFactor;
-                red *= correctionFactor;
-                green *= correctionFactor;
-                blue *= correctionFactor;
-            }
-            else
-            {
-                red = (255 - red) * correctionFactor + red;
-                green = (255 - green) * correctionFactor + green;
-                blue = (255 - blue) * correctionFactor + blue;
-            }
-
-            return Color.FromArgb(color.A, (int)red, (int)green, (int)blue);
-        }
-
-        public void DoAppend(LoggingEvent loggingEvent)
-        {
-            if (loggingEvent.Level >= Level.Info)
-            {
-                AddToLog(new LogItem { TimeStamp = loggingEvent.TimeStamp, Level = loggingEvent.Level, Message = loggingEvent.RenderedMessage });
-            }
-        }
-
-        public class LogItem
-        {
-            public DateTime TimeStamp { get; set; }
-            public Level Level { get; set; }
-            public string Message { get; set; }
-
-            public override string ToString()
-            {
-                return string.Format("{0}: {1}", TimeStamp.ToString("HH:mm:ss"), Message);
-            }
-
-            public string ToStringWithLevel()
-            {
-                return string.Format("{0} [{2}] {1}", TimeStamp.ToString("HH:mm:ss"), Message, Level.ToString());
-            }
-        }
-
-        private void HandleLogCopyClicked(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            if (lbLog.SelectedItems.Count == 0)
-                return;
-
-            string[] selectedLog = lbLog.SelectedItems.Cast<LogItem>().Select(li => li.ToStringWithLevel()).ToArray();
-            Clipboard.SetText(string.Join("\r\n", selectedLog));
-        }
-
-        #endregion
-
         private void HandleDragEnter(object sender, DragEventArgs e)
         {
             LogMethodEntry();
@@ -678,11 +542,6 @@ namespace AzureCloudserviceDeployer
             showNotificationWhenDoneToolStripMenuItem.Checked = !showNotificationWhenDoneToolStripMenuItem.Checked;
             Configuration.Instance.NotifyWhenDone = showNotificationWhenDoneToolStripMenuItem.Checked;
             Configuration.Instance.Save();
-        }
-
-        private void LogMethodEntry([CallerFilePath] string file = "", [CallerMemberName] string member = "", [CallerLineNumber] int line = 0)
-        {
-            Logger.DebugFormat("=> {0}.{1}:{2}", Path.GetFileNameWithoutExtension(file), member, line);
         }
     }
 }
