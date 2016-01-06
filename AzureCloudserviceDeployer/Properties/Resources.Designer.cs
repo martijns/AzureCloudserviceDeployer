@@ -63,9 +63,9 @@ namespace AzureCloudserviceDeployer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Info_icon {
+        internal static System.Drawing.Bitmap Infoicon {
             get {
-                object obj = ResourceManager.GetObject("Info-icon", resourceCulture);
+                object obj = ResourceManager.GetObject("Infoicon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

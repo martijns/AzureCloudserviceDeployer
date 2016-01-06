@@ -1,4 +1,10 @@
-﻿2015-12-14:
+﻿2016-01-06:
+- FIX: Starting the app with no network connection resulted in an error dialog. This has been fixed.
+- FIX: When there was an issue sending the bug report, all fields would remain disabled.
+- FIX: When there was an issue sending feedback, all fields would remain disabled.
+- FIX: Moved logging to a subdirectory (from \AppData\Roaming\ to \AppData\Local\AzureCloudserviceDeployer\).
+
+2015-12-14:
 - FIX: Allow the API to refresh the token if needed (should prevent "failed to authenticate the request" messages when using the tool for longer periods of time)
 - NEW: Asynchronously wait for an operation, showing (a form of) progress in the log window. Repeating logmessages are not duplicated, but instead a count is added to the end.
 - CHG: Renamed "Upgrade preference" to "Deployment type" and updated the descriptions to be more accurate
