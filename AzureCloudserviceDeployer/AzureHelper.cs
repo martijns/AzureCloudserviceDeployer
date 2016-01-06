@@ -181,7 +181,7 @@ namespace AzureCloudserviceDeployer
             // Cleanup of existing extensions
             if (cleanupUnusedExtensions)
             {
-                await CleanupExistingExtensions(service, computeClient, availableDiagnosticsExtension);
+                await CleanupExistingExtensions(subscription, service, computeClient, availableDiagnosticsExtension);
             }
             else
             {
@@ -295,7 +295,7 @@ namespace AzureCloudserviceDeployer
             Logger.InfoFormat("Deployment succesful");
         }
 
-        private static async Task CleanupExistingExtensions(HostedServiceListResponse.HostedService service, ComputeManagementClient computeClient, ExtensionImage availableDiagnosticsExtension)
+        private static async Task CleanupExistingExtensions(SubscriptionListOperationResponse.Subscription subscription, HostedServiceListResponse.HostedService service, ComputeManagementClient computeClient, ExtensionImage availableDiagnosticsExtension)
         {
 
             // Get whatever is currently on Production
@@ -334,7 +334,8 @@ namespace AzureCloudserviceDeployer
                     Logger.InfoFormat("Deleting unused diagnostics extension named {0}...", currentDiagExtension.Id);
                     try
                     {
-                        await computeClient.HostedServices.DeleteExtensionAsync(service.ServiceName, currentDiagExtension.Id);
+                        var deleteOperation = await computeClient.HostedServices.DeleteExtensionAsync(service.ServiceName, currentDiagExtension.Id);
+                        await WaitForOperationAsync(subscription, computeClient, deleteOperation.RequestId);
                     }
                     catch (Exception)
                     {
@@ -435,6 +436,10 @@ namespace AzureCloudserviceDeployer
                 await Task.Delay(5000);
                 RefreshCredentials(subscription, client.Credentials);
                 statusResponse = await client.GetOperationStatusAsync(requestId);
+            }
+            if (statusResponse.Status == OperationStatus.Failed)
+            {
+                throw new CloudException("Operation failed with code " + statusResponse.Error.Code + ": " + statusResponse.Error.Message);
             }
         }
 

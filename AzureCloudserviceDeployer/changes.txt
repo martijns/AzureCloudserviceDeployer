@@ -1,4 +1,7 @@
 ﻿2016-01-06:
+- FIX: When checking for deployment state, failure was not handled.
+
+2016-01-05:
 - FIX: Starting the app with no network connection resulted in an error dialog. This has been fixed.
 - FIX: When there was an issue sending the bug report, all fields would remain disabled.
 - FIX: When there was an issue sending feedback, all fields would remain disabled.
