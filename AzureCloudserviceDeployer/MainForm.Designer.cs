@@ -87,6 +87,7 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.cbForceUpgrade = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
@@ -273,6 +274,7 @@
             // 
             // gbQuickDeploy
             // 
+            this.gbQuickDeploy.Controls.Add(this.cbForceUpgrade);
             this.gbQuickDeploy.Controls.Add(this.btnDownloadExistingPackage);
             this.gbQuickDeploy.Controls.Add(this.pictureBox2);
             this.gbQuickDeploy.Controls.Add(this.lblLabelPreview);
@@ -307,7 +309,7 @@
             this.gbQuickDeploy.Controls.Add(this.cbSubscriptions);
             this.gbQuickDeploy.Location = new System.Drawing.Point(12, 89);
             this.gbQuickDeploy.Name = "gbQuickDeploy";
-            this.gbQuickDeploy.Size = new System.Drawing.Size(613, 366);
+            this.gbQuickDeploy.Size = new System.Drawing.Size(613, 388);
             this.gbQuickDeploy.TabIndex = 4;
             this.gbQuickDeploy.TabStop = false;
             this.gbQuickDeploy.Tag = "KEEP_ENABLED";
@@ -328,7 +330,7 @@
             // 
             this.pictureBox2.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pictureBox2.Image = global::AzureCloudserviceDeployer.Properties.Resources.Infoicon;
-            this.pictureBox2.Location = new System.Drawing.Point(402, 277);
+            this.pictureBox2.Location = new System.Drawing.Point(402, 300);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(16, 16);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -342,24 +344,28 @@
             // lblLabelPreview
             // 
             this.lblLabelPreview.AutoSize = true;
-            this.lblLabelPreview.Location = new System.Drawing.Point(164, 298);
+            this.lblLabelPreview.Location = new System.Drawing.Point(164, 321);
             this.lblLabelPreview.Name = "lblLabelPreview";
             this.lblLabelPreview.Size = new System.Drawing.Size(56, 13);
             this.lblLabelPreview.TabIndex = 31;
             this.lblLabelPreview.Text = "<preview>";
+            this.toolTip1.SetToolTip(this.lblLabelPreview, "Click here to copy the previewed label to clipboard");
+            this.lblLabelPreview.Click += new System.EventHandler(this.HandleLabelPreviewClicked);
             // 
             // lblPreview
             // 
             this.lblPreview.AutoSize = true;
-            this.lblPreview.Location = new System.Drawing.Point(110, 298);
+            this.lblPreview.Location = new System.Drawing.Point(110, 321);
             this.lblPreview.Name = "lblPreview";
             this.lblPreview.Size = new System.Drawing.Size(48, 13);
             this.lblPreview.TabIndex = 30;
             this.lblPreview.Text = "Preview:";
+            this.toolTip1.SetToolTip(this.lblPreview, "Click here to copy the previewed label to clipboard");
+            this.lblPreview.Click += new System.EventHandler(this.HandleLabelPreviewClicked);
             // 
             // btnClearDiagConfig
             // 
-            this.btnClearDiagConfig.Location = new System.Drawing.Point(207, 217);
+            this.btnClearDiagConfig.Location = new System.Drawing.Point(207, 240);
             this.btnClearDiagConfig.Name = "btnClearDiagConfig";
             this.btnClearDiagConfig.Size = new System.Drawing.Size(27, 23);
             this.btnClearDiagConfig.TabIndex = 29;
@@ -369,7 +375,7 @@
             // 
             // btnClearCloudConfig
             // 
-            this.btnClearCloudConfig.Location = new System.Drawing.Point(207, 188);
+            this.btnClearCloudConfig.Location = new System.Drawing.Point(207, 211);
             this.btnClearCloudConfig.Name = "btnClearCloudConfig";
             this.btnClearCloudConfig.Size = new System.Drawing.Size(27, 23);
             this.btnClearCloudConfig.TabIndex = 28;
@@ -379,7 +385,7 @@
             // 
             // btnClearCloudPackage
             // 
-            this.btnClearCloudPackage.Location = new System.Drawing.Point(207, 159);
+            this.btnClearCloudPackage.Location = new System.Drawing.Point(207, 182);
             this.btnClearCloudPackage.Name = "btnClearCloudPackage";
             this.btnClearCloudPackage.Size = new System.Drawing.Size(27, 23);
             this.btnClearCloudPackage.TabIndex = 27;
@@ -390,7 +396,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(9, 277);
+            this.label11.Location = new System.Drawing.Point(9, 300);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(36, 13);
             this.label11.TabIndex = 25;
@@ -398,7 +404,7 @@
             // 
             // tbLabel
             // 
-            this.tbLabel.Location = new System.Drawing.Point(113, 274);
+            this.tbLabel.Location = new System.Drawing.Point(113, 297);
             this.tbLabel.Name = "tbLabel";
             this.tbLabel.Size = new System.Drawing.Size(283, 20);
             this.tbLabel.TabIndex = 24;
@@ -409,7 +415,7 @@
             // 
             this.cbDiagStorage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbDiagStorage.FormattingEnabled = true;
-            this.cbDiagStorage.Location = new System.Drawing.Point(113, 246);
+            this.cbDiagStorage.Location = new System.Drawing.Point(113, 269);
             this.cbDiagStorage.Name = "cbDiagStorage";
             this.cbDiagStorage.Size = new System.Drawing.Size(283, 21);
             this.cbDiagStorage.TabIndex = 23;
@@ -417,7 +423,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(9, 249);
+            this.label10.Location = new System.Drawing.Point(9, 272);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(73, 13);
             this.label10.TabIndex = 22;
@@ -441,7 +447,7 @@
             // btnDeploy
             // 
             this.btnDeploy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDeploy.Location = new System.Drawing.Point(113, 318);
+            this.btnDeploy.Location = new System.Drawing.Point(113, 341);
             this.btnDeploy.Name = "btnDeploy";
             this.btnDeploy.Size = new System.Drawing.Size(142, 35);
             this.btnDeploy.TabIndex = 19;
@@ -457,6 +463,7 @@
             this.cbUpgradePreference.Name = "cbUpgradePreference";
             this.cbUpgradePreference.Size = new System.Drawing.Size(283, 21);
             this.cbUpgradePreference.TabIndex = 18;
+            this.cbUpgradePreference.SelectedIndexChanged += new System.EventHandler(this.HandleDeploymentTypeChanged);
             // 
             // label9
             // 
@@ -489,7 +496,7 @@
             // lblSelectedDiag
             // 
             this.lblSelectedDiag.AutoEllipsis = true;
-            this.lblSelectedDiag.Location = new System.Drawing.Point(240, 222);
+            this.lblSelectedDiag.Location = new System.Drawing.Point(240, 245);
             this.lblSelectedDiag.Name = "lblSelectedDiag";
             this.lblSelectedDiag.Size = new System.Drawing.Size(367, 13);
             this.lblSelectedDiag.TabIndex = 14;
@@ -498,7 +505,7 @@
             // lblSelectedConfig
             // 
             this.lblSelectedConfig.AutoEllipsis = true;
-            this.lblSelectedConfig.Location = new System.Drawing.Point(240, 193);
+            this.lblSelectedConfig.Location = new System.Drawing.Point(240, 216);
             this.lblSelectedConfig.Name = "lblSelectedConfig";
             this.lblSelectedConfig.Size = new System.Drawing.Size(367, 13);
             this.lblSelectedConfig.TabIndex = 13;
@@ -507,7 +514,7 @@
             // lblSelectedPackage
             // 
             this.lblSelectedPackage.AutoEllipsis = true;
-            this.lblSelectedPackage.Location = new System.Drawing.Point(240, 164);
+            this.lblSelectedPackage.Location = new System.Drawing.Point(240, 187);
             this.lblSelectedPackage.Name = "lblSelectedPackage";
             this.lblSelectedPackage.Size = new System.Drawing.Size(367, 13);
             this.lblSelectedPackage.TabIndex = 12;
@@ -516,7 +523,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(9, 222);
+            this.label7.Location = new System.Drawing.Point(9, 245);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(97, 13);
             this.label7.TabIndex = 11;
@@ -525,7 +532,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(9, 193);
+            this.label6.Location = new System.Drawing.Point(9, 216);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(69, 13);
             this.label6.TabIndex = 10;
@@ -534,7 +541,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 164);
+            this.label5.Location = new System.Drawing.Point(9, 187);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(82, 13);
             this.label5.TabIndex = 9;
@@ -542,7 +549,7 @@
             // 
             // btnBrowseDiagnostics
             // 
-            this.btnBrowseDiagnostics.Location = new System.Drawing.Point(113, 217);
+            this.btnBrowseDiagnostics.Location = new System.Drawing.Point(113, 240);
             this.btnBrowseDiagnostics.Name = "btnBrowseDiagnostics";
             this.btnBrowseDiagnostics.Size = new System.Drawing.Size(88, 23);
             this.btnBrowseDiagnostics.TabIndex = 8;
@@ -552,7 +559,7 @@
             // 
             // btnBrowseCloudConfig
             // 
-            this.btnBrowseCloudConfig.Location = new System.Drawing.Point(113, 188);
+            this.btnBrowseCloudConfig.Location = new System.Drawing.Point(113, 211);
             this.btnBrowseCloudConfig.Name = "btnBrowseCloudConfig";
             this.btnBrowseCloudConfig.Size = new System.Drawing.Size(88, 23);
             this.btnBrowseCloudConfig.TabIndex = 7;
@@ -562,7 +569,7 @@
             // 
             // btnBrowseCloudPackage
             // 
-            this.btnBrowseCloudPackage.Location = new System.Drawing.Point(113, 159);
+            this.btnBrowseCloudPackage.Location = new System.Drawing.Point(113, 182);
             this.btnBrowseCloudPackage.Name = "btnBrowseCloudPackage";
             this.btnBrowseCloudPackage.Size = new System.Drawing.Size(88, 23);
             this.btnBrowseCloudPackage.TabIndex = 6;
@@ -644,7 +651,7 @@
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.lbLog);
-            this.groupBox3.Location = new System.Drawing.Point(12, 461);
+            this.groupBox3.Location = new System.Drawing.Point(12, 483);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(613, 150);
             this.groupBox3.TabIndex = 6;
@@ -667,12 +674,24 @@
             this.notifyIcon1.Text = "AzureCloudserviceDeployer";
             this.notifyIcon1.Visible = true;
             // 
+            // cbForceUpgrade
+            // 
+            this.cbForceUpgrade.AutoSize = true;
+            this.cbForceUpgrade.Checked = true;
+            this.cbForceUpgrade.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbForceUpgrade.Location = new System.Drawing.Point(113, 159);
+            this.cbForceUpgrade.Name = "cbForceUpgrade";
+            this.cbForceUpgrade.Size = new System.Drawing.Size(275, 17);
+            this.cbForceUpgrade.TabIndex = 35;
+            this.cbForceUpgrade.Text = "Force upgrade if role size or number of roles changes";
+            this.cbForceUpgrade.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(637, 624);
+            this.ClientSize = new System.Drawing.Size(637, 643);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.gbQuickDeploy);
             this.Controls.Add(this.groupBox1);
@@ -761,6 +780,7 @@
         private System.Windows.Forms.ToolStripMenuItem flashApplicationToolStripMenuItem;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.ToolStripMenuItem showNotificationWhenDoneToolStripMenuItem;
+        private System.Windows.Forms.CheckBox cbForceUpgrade;
     }
 }
 

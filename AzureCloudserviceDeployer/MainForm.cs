@@ -37,6 +37,7 @@ namespace AzureCloudserviceDeployer
             LogMethodEntry();
             InitializeComponent();
             SetLoggingListBox(lbLog);
+            HandleDeploymentTypeChanged(this, EventArgs.Empty);
 
             // Load options from configuration
             optionCleanupUnusedExtensionsToolStripMenuItem.Checked = Configuration.Instance.CleanupUnusedExtensions;
@@ -268,7 +269,7 @@ namespace AzureCloudserviceDeployer
                     if (Configuration.Instance.AutoDownloadPackageBeforeDeploy && !CheckAndChoosePackageDownloadLocation())
                         throw new ApplicationException("A download location for packages must be selected");
                     if (subscription == null)
-                        throw new ApplicationException("Subscription must be selectered");
+                        throw new ApplicationException("Subscription must be selected");
                     if (service == null)
                         throw new ApplicationException("Cloudservice must be selected");
                     if (packageStorage == null)
@@ -292,7 +293,7 @@ namespace AzureCloudserviceDeployer
                         if (Configuration.Instance.AutoDownloadPackageBeforeDeploy)
                             await AzureHelper.DownloadDeploymentAsync(subscription, service, slot, packageStorage, Configuration.Instance.PackageDownloadPath, true);
 
-                        await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage, deploymentLabel, Configuration.Instance.CleanupUnusedExtensions);
+                        await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage, deploymentLabel, Configuration.Instance.CleanupUnusedExtensions, cbForceUpgrade.Checked);
 
                         ActionCompleted("ACD: " + service.ServiceName + "/" + slot, "Successfully deployed", ToolTipIcon.Info);
                     }
@@ -542,6 +543,32 @@ namespace AzureCloudserviceDeployer
             showNotificationWhenDoneToolStripMenuItem.Checked = !showNotificationWhenDoneToolStripMenuItem.Checked;
             Configuration.Instance.NotifyWhenDone = showNotificationWhenDoneToolStripMenuItem.Checked;
             Configuration.Instance.Save();
+        }
+
+        private void HandleDeploymentTypeChanged(object sender, EventArgs e)
+        {
+            LogMethodEntry();
+            if (cbUpgradePreference.SelectedIndex == -1)
+            {
+                UpdateControlEnabledState(cbForceUpgrade, false);
+                return;
+            }
+            var pref = ((KeyValuePair<UpgradePreference, string>)cbUpgradePreference.SelectedItem).Key;
+            switch (pref)
+            {
+                case UpgradePreference.UpgradeSimultaneously:
+                case UpgradePreference.UpgradeWithUpdateDomains:
+                    UpdateControlEnabledState(cbForceUpgrade, true);
+                    break;
+                default:
+                    UpdateControlEnabledState(cbForceUpgrade, false);
+                    break;
+            }
+        }
+
+        private void HandleLabelPreviewClicked(object sender, EventArgs e)
+        {
+            Clipboard.SetText(GetRenderedLabel());
         }
     }
 }

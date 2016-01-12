@@ -105,7 +105,7 @@ namespace AzureCloudserviceDeployer
         public static async Task DeployAsync(SubscriptionListOperationResponse.Subscription subscription, HostedServiceListResponse.HostedService service,
             StorageAccount storage, DeploymentSlot slot, UpgradePreference upgradePreference, string pathToCspkg,
             string pathToCscfg, string pathToDiagExtensionConfig, StorageAccount diagStorage, string deploymentLabel,
-            bool cleanupUnusedExtensions)
+            bool cleanupUnusedExtensions, bool forceWhenUpgrading)
         {
             Logger.InfoFormat("Preparing for deployment of {0}...", service.ServiceName);
             var credentials = GetCredentials(subscription);
@@ -230,7 +230,8 @@ namespace AzureCloudserviceDeployer
                 PackageUri = blobRef.Uri,
                 Label = deploymentLabel ?? DateTime.UtcNow.ToString("u") + " " + Environment.UserName,
                 ExtensionConfiguration = extensionConfiguration,
-                Mode = upgradePreference == UpgradePreference.UpgradeSimultaneously ? DeploymentUpgradeMode.Simultaneous : DeploymentUpgradeMode.Auto
+                Mode = upgradePreference == UpgradePreference.UpgradeSimultaneously ? DeploymentUpgradeMode.Simultaneous : DeploymentUpgradeMode.Auto,
+                Force = forceWhenUpgrading
             };
             Logger.InfoFormat("Label for deployment: {0}", deployParams.Label);
 
