@@ -20,24 +20,23 @@ using System.Windows.Forms;
 using log4net.Core;
 using log4net;
 using System.Runtime.CompilerServices;
+using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace AzureCloudserviceDeployer
 {
     public partial class MainForm : AppForm
     {
         private static ILog Logger = LogManager.GetLogger(typeof(MainForm));
+        private static int TabCounter = 1;
 
-        private bool _authenticated;
-        private string _selectedPackage;
-        private string _selectedConfig;
-        private string _selectedDiag;
+        internal bool IsAuthenticated { get; set; }
 
         public MainForm()
         {
             LogMethodEntry();
             InitializeComponent();
             SetLoggingListBox(lbLog);
-            HandleDeploymentTypeChanged(this, EventArgs.Empty);
 
             // Load options from configuration
             optionCleanupUnusedExtensionsToolStripMenuItem.Checked = Configuration.Instance.CleanupUnusedExtensions;
@@ -49,9 +48,16 @@ namespace AzureCloudserviceDeployer
         private void HandleMainformShown(object sender, EventArgs e)
         {
             LogMethodEntry();
-            UpdateFormState();
             AppVersion.CheckForUpdateAsync();
-            lblLabelPreview.Text = GetRenderedLabel();
+            tabControl1.TabPages.Clear();
+            var deploy = new DeployControl(this, TabCounter.ToString());
+            deploy.Dock = DockStyle.Fill;
+            var page = new TabPage("#" + TabCounter++);
+            page.Controls.Add(deploy);
+            tabControl1.TabPages.Add(page);
+            tabControl1.TabPages.Add(new TabPage("+"));
+            UpdatePresetsMRU();
+            HandleAuthenticateClicked(this, EventArgs.Empty);
         }
 
         private void HandleChangelogClicked(object sender, EventArgs e)
@@ -69,22 +75,25 @@ namespace AzureCloudserviceDeployer
         private async void HandleAuthenticateClicked(object sender, EventArgs e)
         {
             LogMethodEntry();
-            await PerformWorkAsync(this, null, async () =>
+            await PerformWorkAsync(null, async () =>
             {
                 AuthenticationResult auth = null;
                 try
                 {
-                    auth = AzureHelper.GetAuthentication(null, true);
+                    auth = AzureHelper.GetAuthentication("main", null, true);
                 }
                 catch (AdalException aex)
                 {
                     Logger.Error(aex.Message);
                     return;
                 }
-                _authenticated = true;
+                IsAuthenticated = true;
                 lblLoggedInUser.Text = auth.UserInfo.DisplayableId;
-                await UpdateSubscriptions();
-                UpdateFormState();
+                foreach (var control in tabControl1.TabPages.OfType<TabPage>().SelectMany(p => p.Controls.OfType<DeployControl>()))
+                {
+                    this.UpdateControlEnabledState(control, true);
+                    await control.UpdateSubscriptions(lblLoggedInUser.Text);
+                }
             });
         }
 
@@ -94,305 +103,6 @@ namespace AzureCloudserviceDeployer
             Close();
         }
 
-        private async Task UpdateSubscriptions()
-        {
-            LogMethodEntry();
-            await PerformWorkAsync(this, null, async () =>
-            {
-                var subscriptions = await AzureHelper.GetSubscriptionsAsync();
-                cbSubscriptions.Items.Clear();
-                cbSubscriptions.Items.Add("");
-                foreach (var sub in subscriptions.OrderBy(s => s.SubscriptionName))
-                {
-                    cbSubscriptions.Items.Add(sub);
-                }
-                cbSubscriptions.ValueMember = "SubscriptionName";
-
-                UpdateFormState();
-            });
-        }
-
-        private async void HandleSubscriptionIndexChanged(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            await PerformWorkAsync(this, null, async () =>
-            {
-                var subscription = cbSubscriptions.SelectedItem as SubscriptionListOperationResponse.Subscription;
-                if (subscription == null)
-                    return;
-
-                // Clear currently selected files
-                ClearAllSelectedFiles();
-
-                // Load cloudservices
-                var hostedservices = await AzureHelper.GetCloudservicesAsync(subscription);
-                //AzureHelper.Test(subscription);
-                cbCloudservices.Items.Clear();
-                foreach (var service in hostedservices.OrderBy(s => s.ServiceName))
-                {
-                    cbCloudservices.Items.Add(service);
-                }
-                cbCloudservices.ValueMember = "ServiceName";
-
-                // Load storageaccounts
-                var storageaccounts = await AzureHelper.GetStorageAccountsAsync(subscription);
-                cbPackageStorage.Items.Clear();
-                foreach (var account in storageaccounts.OrderBy(s => s.Name))
-                {
-                    cbPackageStorage.Items.Add(account);
-                }
-                cbPackageStorage.ValueMember = "Name";
-                cbPackageStorage.SelectedIndex = 0;
-
-                // Load slots
-                cbSlot.Items.Clear();
-                cbSlot.Items.Add(DeploymentSlot.Production);
-                cbSlot.Items.Add(DeploymentSlot.Staging);
-                cbSlot.SelectedIndex = 0;
-
-                // Load upgrade preferences
-                cbUpgradePreference.Items.Clear();
-                cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.UpgradeWithUpdateDomains, UpgradePreference.UpgradeWithUpdateDomains.GetDescription()));
-                cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.UpgradeSimultaneously, UpgradePreference.UpgradeSimultaneously.GetDescription()));
-                cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.DeleteAndCreateDeployment, UpgradePreference.DeleteAndCreateDeployment.GetDescription()));
-                cbUpgradePreference.Items.Add(new KeyValuePair<UpgradePreference, string>(UpgradePreference.DeleteAndCreateDeploymentInitiallyStopped, UpgradePreference.DeleteAndCreateDeploymentInitiallyStopped.GetDescription()));
-                cbUpgradePreference.ValueMember = "Key";
-                cbUpgradePreference.DisplayMember = "Value";
-                cbUpgradePreference.SelectedIndex = 0;
-
-                // Load diagnostics storage
-                cbDiagStorage.Items.Clear();
-                cbDiagStorage.Items.Add("Extract from .cscfg diag connection string");
-                foreach (var account in storageaccounts.OrderBy(s => s.Name))
-                {
-                    cbDiagStorage.Items.Add(account);
-                }
-                cbDiagStorage.ValueMember = "Name";
-                cbDiagStorage.SelectedIndex = 0;
-
-                UpdateFormState();
-            });
-        }
-
-        private void UpdateFormState()
-        {
-            LogMethodEntry();
-            UpdateControlEnabledState(cbSubscriptions, _authenticated);
-            var state = _authenticated && cbSubscriptions.SelectedItem != null;
-            UpdateControlEnabledState(cbCloudservices, state);
-            UpdateControlEnabledState(cbPackageStorage, state);
-            UpdateControlEnabledState(cbSlot, state);
-            UpdateControlEnabledState(cbUpgradePreference, state);
-            UpdateControlEnabledState(btnBrowseCloudPackage, state);
-            UpdateControlEnabledState(btnBrowseCloudConfig, state);
-            UpdateControlEnabledState(btnBrowseDiagnostics, state);
-            UpdateControlEnabledState(btnClearCloudPackage, state);
-            UpdateControlEnabledState(btnClearCloudConfig, state);
-            UpdateControlEnabledState(btnClearDiagConfig, state);
-            UpdateControlEnabledState(cbDiagStorage, state);
-            UpdateControlEnabledState(tbLabel, state);
-            UpdateControlEnabledState(btnDeploy, state);
-            UpdateControlEnabledState(btnDownloadExistingPackage, state);
-            UpdateControlEnabledState(lblPreview, state);
-            UpdateControlEnabledState(lblLabelPreview, state);
-        }
-
-        private string SelectFile(string filter)
-        {
-            LogMethodEntry();
-            var dialog = new OpenFileDialog();
-            dialog.CheckFileExists = true;
-            dialog.Filter = filter;
-            dialog.Multiselect = false;
-            dialog.ReadOnlyChecked = true;
-            var result = dialog.ShowDialog(this);
-            if (result == DialogResult.Cancel)
-                return null;
-            return dialog.FileName;
-        }
-
-        private void HandleSelectCloudPackage(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            UpdateSelectedFiles(SelectFile("Cloud Package|*.cspkg|All Files|*.*"));
-        }
-
-        private void HandleSelectCloudConfig(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            UpdateSelectedFiles(SelectFile("Cloud Config|*.cscfg|All Files|*.*"));
-        }
-
-        private void HandleSelectCloudDiag(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            UpdateSelectedFiles(SelectFile("Cloud Diag Config|*.PubConfig.xml|All Files|*.*"));
-        }
-
-        private void UpdateSelectedFiles(string path)
-        {
-            LogMethodEntry();
-            if (path == null)
-                return;
-            if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                foreach (var file in Directory.EnumerateFileSystemEntries(path))
-                    UpdateSelectedFiles(file);
-            }
-            if (path.EndsWith(".cspkg", StringComparison.OrdinalIgnoreCase))
-                _selectedPackage = path;
-            if (path.EndsWith(".cscfg", StringComparison.OrdinalIgnoreCase))
-                _selectedConfig = path;
-            if (path.IndexOf(".pubconfig", StringComparison.OrdinalIgnoreCase) >= 0 && path.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
-                _selectedDiag = path;
-            lblSelectedPackage.Text = Path.GetFileName(_selectedPackage);
-            lblSelectedConfig.Text = Path.GetFileName(_selectedConfig);
-            lblSelectedDiag.Text = Path.GetFileName(_selectedDiag);
-        }
-
-        private async void HandleDeployClicked(object sender, EventArgs e)
-        {
-            Logger.Debug("HandleDeployClicked");
-            await PerformWorkAsync(this, null, async () =>
-            {
-                var subscription = cbSubscriptions.SelectedItem as SubscriptionListOperationResponse.Subscription;
-                var service = cbCloudservices.SelectedItem as HostedServiceListResponse.HostedService;
-                var packageStorage = cbPackageStorage.SelectedItem as StorageAccount;
-                var slot = (DeploymentSlot)cbSlot.SelectedItem;
-                var pref = ((KeyValuePair<UpgradePreference,string>)cbUpgradePreference.SelectedItem).Key;
-                var diagstorage = cbDiagStorage.SelectedItem as StorageAccount;
-                lblLabelPreview.Text = GetRenderedLabel();
-                var deploymentLabel = GetRenderedLabel();
-
-                try
-                {
-                    if (Configuration.Instance.AutoDownloadPackageBeforeDeploy && !CheckAndChoosePackageDownloadLocation())
-                        throw new ApplicationException("A download location for packages must be selected");
-                    if (subscription == null)
-                        throw new ApplicationException("Subscription must be selected");
-                    if (service == null)
-                        throw new ApplicationException("Cloudservice must be selected");
-                    if (packageStorage == null)
-                        throw new ApplicationException("Package storage account must be selected");
-                    if (_selectedPackage == null)
-                        throw new ApplicationException("A .cspkg file must be selected");
-                    if (_selectedConfig == null)
-                        throw new ApplicationException("A .cscfg file must be selected");
-                    if (_selectedDiag == null)
-                        if (MessageBox.Show("Diagnostics configuration is not selected. Are you sure you want to continue?", "Diagnostics Configuration", MessageBoxButtons.YesNo) != DialogResult.Yes)
-                            return;
-                    if (!File.Exists(_selectedPackage))
-                        throw new ApplicationException("The specified .cspkg no longer exists on the filesystem: " + _selectedPackage);
-                    if (!File.Exists(_selectedConfig))
-                        throw new ApplicationException("The specified .cscfg no longer exists on the filesystem:" + _selectedConfig);
-                    if (_selectedDiag != null && !File.Exists(_selectedDiag))
-                        throw new ApplicationException("The specified diagnostics configuration file no longer exists on the filesystem: " + _selectedDiag);
-
-                    try
-                    {
-                        if (Configuration.Instance.AutoDownloadPackageBeforeDeploy)
-                            await AzureHelper.DownloadDeploymentAsync(subscription, service, slot, packageStorage, Configuration.Instance.PackageDownloadPath, true);
-
-                        await AzureHelper.DeployAsync(subscription, service, packageStorage, slot, pref, _selectedPackage, _selectedConfig, _selectedDiag, diagstorage, deploymentLabel, Configuration.Instance.CleanupUnusedExtensions, cbForceUpgrade.Checked);
-
-                        ActionCompleted("ACD: " + service.ServiceName + "/" + slot, "Successfully deployed", ToolTipIcon.Info);
-                    }
-                    catch (CloudException cex)
-                    {
-                        Logger.Error(cex.Message);
-                        ActionCompleted("ACD: " + service.ServiceName + "/" + slot, "Failed deployment", ToolTipIcon.Error);
-                    }
-                }
-                catch (ApplicationException aex)
-                {
-                    // We use ApplicationExceptions to indicate a custom error. All other errors will result in a ReportBug dialog.
-                    MessageBox.Show(this, "Deployment failed: " + aex.Message);
-                }
-            });
-        }
-
-        private void HandleDragEnter(object sender, DragEventArgs e)
-        {
-            LogMethodEntry();
-            if (IsBusy)
-                return;
-
-            if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
-        }
-
-        private void HandleDragDrop(object sender, DragEventArgs e)
-        {
-            LogMethodEntry();
-            if (IsBusy)
-                return;
-
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (var file in files)
-                UpdateSelectedFiles(file);
-        }
-
-        private void HandleTooltipClick(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            var control = sender as Control;
-            if (control == null)
-                return;
-
-            string tooltipMsg = toolTip1.GetToolTip(control);
-            toolTip1.Show(tooltipMsg, control);
-        }
-
-        private void ClearAllSelectedFiles()
-        {
-            LogMethodEntry();
-            HandleClearDiagConfig(this, EventArgs.Empty);
-            HandleClearCloudConfig(this, EventArgs.Empty);
-            HandleClearCloudPackage(this, EventArgs.Empty);
-        }
-
-        private void HandleClearDiagConfig(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            if (_selectedDiag != null)
-            {
-                _selectedDiag = null;
-                lblSelectedDiag.Text = "<cleared>";
-            }
-        }
-
-        private void HandleClearCloudConfig(object sender, EventArgs e)
-        {
-            Logger.Debug("HandleClearCloudConfig");
-            if (_selectedConfig != null)
-            {
-                _selectedConfig = null;
-                lblSelectedConfig.Text = "<cleared>";
-            }
-        }
-
-        private void HandleClearCloudPackage(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            if (_selectedPackage != null)
-            {
-                _selectedPackage = null;
-                lblSelectedPackage.Text = "<cleared>";
-            }
-        }
-
-        private string GetRenderedLabel()
-        {
-            string label = tbLabel.Text;
-            label = label.Replace("[UTCDT]", DateTime.UtcNow.ToString("u"));
-            label = label.Replace("[MACHINE]", Environment.MachineName);
-            label = label.Replace("[USER]", Environment.UserName);
-            return label;
-        }
-
-        private void HandleLabelKeyUp(object sender, KeyEventArgs e)
-        {
-            lblLabelPreview.Text = GetRenderedLabel();
-        }
 
         private void HandleOptionCleanupUnusedDiagnosticsExtensions(object sender, EventArgs e)
         {
@@ -410,63 +120,8 @@ namespace AzureCloudserviceDeployer
             Configuration.Instance.Save();
         }
 
-        private async void HandleDownloadPackageClicked(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            await PerformWorkAsync(this, null, async () =>
-            {
-                var subscription = cbSubscriptions.SelectedItem as SubscriptionListOperationResponse.Subscription;
-                var service = cbCloudservices.SelectedItem as HostedServiceListResponse.HostedService;
-                var packageStorage = cbPackageStorage.SelectedItem as StorageAccount;
-                var slot = (DeploymentSlot)cbSlot.SelectedItem;
 
-                try
-                {
-                    if (!CheckAndChoosePackageDownloadLocation())
-                        throw new ApplicationException("A download location for packages must be selected");
-                    if (subscription == null)
-                        throw new ApplicationException("Subscription must be selectered");
-                    if (service == null)
-                        throw new ApplicationException("Cloudservice must be selected");
-                    if (packageStorage == null)
-                        throw new ApplicationException("Package storage account must be selected");
-
-                    try
-                    {
-                        await AzureHelper.DownloadDeploymentAsync(subscription, service, slot, packageStorage, Configuration.Instance.PackageDownloadPath);
-
-                        ActionCompleted("ACD: " + service.ServiceName + "/" + slot, "Package downloaded", ToolTipIcon.Info);
-                    }
-                    catch (CloudException cex)
-                    {
-                        Logger.Error(cex.Message);
-                        ActionCompleted("ACD: " + service.ServiceName + "/" + slot, "Failed downloading package", ToolTipIcon.Error);
-                    }
-                }
-                catch (ApplicationException aex)
-                {
-                    // We use ApplicationExceptions to indicate a custom error. All other errors will result in a ReportBug dialog.
-                    MessageBox.Show(this, "Package download failed: " + aex.Message);
-                }
-            });
-        }
-
-        private bool CheckAndChoosePackageDownloadLocation()
-        {
-            LogMethodEntry();
-            if (string.IsNullOrEmpty(Configuration.Instance.PackageDownloadPath) || !Directory.Exists(Configuration.Instance.PackageDownloadPath))
-            {
-                ChoosePackageDownloadLocation();
-            }
-
-            if (string.IsNullOrEmpty(Configuration.Instance.PackageDownloadPath) || !Directory.Exists(Configuration.Instance.PackageDownloadPath))
-            {
-                return false;
-            }
-            return true;
-        }
-
-        private void ChoosePackageDownloadLocation()
+        internal void ChoosePackageDownloadLocation()
         {
             LogMethodEntry();
             var dialog = new FolderBrowserDialog();
@@ -491,25 +146,7 @@ namespace AzureCloudserviceDeployer
             new FeedbackForm().ShowDialog(this);
         }
 
-        private void HandleCloudserviceChanged(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            ClearAllSelectedFiles();
-        }
-
-        private void HandlePackagestorageChanged(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            ClearAllSelectedFiles();
-        }
-
-        private void HandleSlotChanged(object sender, EventArgs e)
-        {
-            LogMethodEntry();
-            ClearAllSelectedFiles();
-        }
-
-        private void ActionCompleted(string title, string message, ToolTipIcon icon)
+        internal void ActionCompleted(string title, string message, ToolTipIcon icon)
         {
             LogMethodEntry();
             if (title == null)
@@ -529,6 +166,16 @@ namespace AzureCloudserviceDeployer
             }
         }
 
+        internal void ColorTab(string id, Color color)
+        {
+            var tab = tabControl1.TabPages.Cast<TabPage>().Where(t => t.Text == id).FirstOrDefault();
+            if (tab != null)
+            {
+                tab.Tag = color;
+            }
+            tabControl1.Invalidate();
+        }
+
         private void HandleFlashApplicationWhenDoneClicked(object sender, EventArgs e)
         {
             LogMethodEntry();
@@ -545,30 +192,173 @@ namespace AzureCloudserviceDeployer
             Configuration.Instance.Save();
         }
 
-        private void HandleDeploymentTypeChanged(object sender, EventArgs e)
+        private async void HandleTabSelecting(object sender, TabControlCancelEventArgs e)
         {
             LogMethodEntry();
-            if (cbUpgradePreference.SelectedIndex == -1)
-            {
-                UpdateControlEnabledState(cbForceUpgrade, false);
+            if (e.TabPage == null)
                 return;
-            }
-            var pref = ((KeyValuePair<UpgradePreference, string>)cbUpgradePreference.SelectedItem).Key;
-            switch (pref)
+
+            if (e.Action == TabControlAction.Selecting && e.TabPage.Text == "+")
             {
-                case UpgradePreference.UpgradeSimultaneously:
-                case UpgradePreference.UpgradeWithUpdateDomains:
-                    UpdateControlEnabledState(cbForceUpgrade, true);
-                    break;
-                default:
-                    UpdateControlEnabledState(cbForceUpgrade, false);
-                    break;
+                var deploy = new DeployControl(this, TabCounter.ToString());
+                deploy.Dock = DockStyle.Fill;
+                e.TabPage.Text = "#" + TabCounter++;
+                e.TabPage.Controls.Add(deploy);
+                if (IsAuthenticated)
+                    await deploy.UpdateSubscriptions(lblLoggedInUser.Text);
+
+                tabControl1.TabPages.Add(new TabPage("+"));
+            }
+            if (e.TabPage.Tag != null)
+            {
+                e.TabPage.Tag = null;
+                tabControl1.Invalidate();
             }
         }
 
-        private void HandleLabelPreviewClicked(object sender, EventArgs e)
+        private void HandleClosePage(object sender, EventArgs e)
         {
-            Clipboard.SetText(GetRenderedLabel());
+            LogMethodEntry();
+            tabControl1.TabPages.Remove(tabControl1.SelectedTab);
+        }
+
+        private void HandleDrawTab(object sender, DrawItemEventArgs e)
+        {
+            // This event is called once for each tab button in your tab control
+
+            // First paint the background with a color based on the current tab
+
+            // e.Index is the index of the tab in the TabPages collection.
+            var color = tabControl1.TabPages[e.Index].Tag as Color?;
+            if (!color.HasValue)
+                color = Control.DefaultBackColor;
+            e.Graphics.FillRectangle(new SolidBrush(color.Value), e.Bounds);
+
+            // Then draw the current tab button text 
+            Rectangle paddedBounds = e.Bounds;
+            paddedBounds.Inflate(-2, -2);
+            e.Graphics.DrawString(tabControl1.TabPages[e.Index].Text, this.Font, SystemBrushes.ControlText, paddedBounds);
+        }
+
+        private void HandleSavePresetClicked(object sender, EventArgs e)
+        {
+            LogMethodEntry();
+            List<DeployControlState> states = new List<DeployControlState>();
+            foreach (var control in tabControl1.TabPages.OfType<TabPage>().SelectMany(p => p.Controls.OfType<DeployControl>()))
+            {
+                var state = control.PersistState();
+                states.Add(state);
+            }
+            string statesJson = JsonConvert.SerializeObject(states.ToArray());
+
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filter = "ACD Preset File (*.acdpreset)|*.acdpreset|All files (*.*)|*.*";
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                using (Stream s = File.Open(dialog.FileName, FileMode.Create))
+                {
+                    using (StreamWriter sw = new StreamWriter(s))
+                    {
+                        sw.Write(statesJson);
+                    }
+                }
+                UpdatePresetsMRU(dialog.FileName);
+            }
+        }
+
+        private void HandleRestorePresetClicked(object sender, EventArgs e)
+        {
+            LogMethodEntry();
+            var dialog = new OpenFileDialog();
+            dialog.CheckFileExists = true;
+            dialog.Filter = "ACD Preset File (*.acdpreset)|*.acdpreset|All files (*.*)|*.*";
+            dialog.Multiselect = false;
+            dialog.ReadOnlyChecked = true;
+            var result = dialog.ShowDialog(this);
+            if (result == DialogResult.Cancel)
+                return;
+            RestorePresetFromFile(dialog.FileName);
+        }
+
+        private async void RestorePresetFromFile(string filepath)
+        {
+            LogMethodEntry();
+            DeployControlState[] states = new DeployControlState[0];
+            try
+            {
+                string statesJson = File.ReadAllText(filepath);
+                states = JsonConvert.DeserializeObject<DeployControlState[]>(statesJson);
+                UpdatePresetsMRU(filepath);
+                if (states == null || states.Length == 0)
+                    return;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to restore state: " + ex.Message);
+                return;
+            }
+
+            tabControl1.Visible = false;
+            tabControl1.SuspendDraw();
+            try
+            {
+                TabCounter = 1;
+                tabControl1.TabPages.Clear();
+                foreach (var state in states)
+                {
+                    var deploy = new DeployControl(this, TabCounter.ToString());
+                    deploy.Dock = DockStyle.Fill;
+                    var page = new TabPage("#" + TabCounter++);
+                    page.Controls.Add(deploy);
+                    if (IsAuthenticated)
+                        await deploy.UpdateSubscriptions(lblLoggedInUser.Text);
+                    await deploy.RestoreState(state);
+                    tabControl1.TabPages.Add(page);
+                }
+                tabControl1.TabPages.Add(new TabPage("+"));
+            }
+            finally
+            {
+                tabControl1.ResumeDraw();
+                tabControl1.Visible = true;
+            }
+        }
+
+        private void UpdatePresetsMRU(string lastAccessedFile = null)
+        {
+            LogMethodEntry();
+            if (lastAccessedFile != null)
+            {
+                if (Configuration.Instance.MostRecentlyUsedPresets.Contains(lastAccessedFile))
+                    Configuration.Instance.MostRecentlyUsedPresets.Remove(lastAccessedFile);
+                Configuration.Instance.MostRecentlyUsedPresets.Insert(0, lastAccessedFile);
+
+                while (Configuration.Instance.MostRecentlyUsedPresets.Count > 10)
+                    Configuration.Instance.MostRecentlyUsedPresets.RemoveAt(10);
+
+                Configuration.Instance.Save();
+            }
+
+            while (presetsToolStripMenuItem.DropDownItems.Count > 3)
+                presetsToolStripMenuItem.DropDownItems.RemoveAt(3);
+
+            foreach (string path in Configuration.Instance.MostRecentlyUsedPresets)
+            {
+                ToolStripMenuItem item = new ToolStripMenuItem(Path.GetFileNameWithoutExtension(path));
+                item.Click += HandleMRUPresetClicked;
+                item.Tag = path;
+                item.ToolTipText = path;
+                presetsToolStripMenuItem.DropDownItems.Add(item);
+            }
+        }
+
+        private void HandleMRUPresetClicked(object sender, EventArgs e)
+        {
+            LogMethodEntry();
+            var item = sender as ToolStripMenuItem;
+            if (item == null)
+                return;
+            RestorePresetFromFile(item.Tag as string);
         }
     }
 }

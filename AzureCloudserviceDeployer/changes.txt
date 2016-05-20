@@ -1,4 +1,10 @@
-﻿2016-01-12:
+﻿2016-05-20:
+- NEW: Added support for multiple tabs for multiple simultaneous deployments. When a deployment succeeds or fails, the color of the tab is changed to respectively green or red. Selecting the tab resets the color.
+- NEW: Added caching so that selecting the same subscription will go much smoother.
+- NEW: Added presets. You can save or restore deployment tabs to/from a file. They are saved in readable JSON format and exchangeable. Note that you'll need to authenticate with the correct account before restoring tabs.
+- CHG: Automatically display the authentication window on startup.
+
+2016-01-12:
 - NEW: Allow forcing an upgrade if role size or role count changes
 - NEW: Hidden feature: click the label preview to copy it to clipboard
 

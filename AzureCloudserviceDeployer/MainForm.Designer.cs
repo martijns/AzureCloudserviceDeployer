@@ -50,51 +50,23 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.lblLoggedInUser = new System.Windows.Forms.Label();
-            this.gbQuickDeploy = new System.Windows.Forms.GroupBox();
-            this.btnDownloadExistingPackage = new System.Windows.Forms.Button();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.lblLabelPreview = new System.Windows.Forms.Label();
-            this.lblPreview = new System.Windows.Forms.Label();
-            this.btnClearDiagConfig = new System.Windows.Forms.Button();
-            this.btnClearCloudConfig = new System.Windows.Forms.Button();
-            this.btnClearCloudPackage = new System.Windows.Forms.Button();
-            this.label11 = new System.Windows.Forms.Label();
-            this.tbLabel = new System.Windows.Forms.TextBox();
-            this.cbDiagStorage = new System.Windows.Forms.ComboBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.btnDeploy = new System.Windows.Forms.Button();
-            this.cbUpgradePreference = new System.Windows.Forms.ComboBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.cbSlot = new System.Windows.Forms.ComboBox();
-            this.lblSelectedDiag = new System.Windows.Forms.Label();
-            this.lblSelectedConfig = new System.Windows.Forms.Label();
-            this.lblSelectedPackage = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.btnBrowseDiagnostics = new System.Windows.Forms.Button();
-            this.btnBrowseCloudConfig = new System.Windows.Forms.Button();
-            this.btnBrowseCloudPackage = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
-            this.cbPackageStorage = new System.Windows.Forms.ComboBox();
-            this.cbCloudservices = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.cbSubscriptions = new System.Windows.Forms.ComboBox();
             this.lbLog = new System.Windows.Forms.ListBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.btnClose = new System.Windows.Forms.Button();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.cbForceUpgrade = new System.Windows.Forms.CheckBox();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.presetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.savePresetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restorePresetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
-            this.gbQuickDeploy.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox3.SuspendLayout();
+            this.tabControl1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -102,6 +74,7 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.optionsToolStripMenuItem,
+            this.presetsToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -120,7 +93,7 @@
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.HandleExitClicked);
             // 
@@ -272,368 +245,6 @@
             this.lblLoggedInUser.TabIndex = 3;
             this.lblLoggedInUser.Text = "nobody";
             // 
-            // gbQuickDeploy
-            // 
-            this.gbQuickDeploy.Controls.Add(this.cbForceUpgrade);
-            this.gbQuickDeploy.Controls.Add(this.btnDownloadExistingPackage);
-            this.gbQuickDeploy.Controls.Add(this.pictureBox2);
-            this.gbQuickDeploy.Controls.Add(this.lblLabelPreview);
-            this.gbQuickDeploy.Controls.Add(this.lblPreview);
-            this.gbQuickDeploy.Controls.Add(this.btnClearDiagConfig);
-            this.gbQuickDeploy.Controls.Add(this.btnClearCloudConfig);
-            this.gbQuickDeploy.Controls.Add(this.btnClearCloudPackage);
-            this.gbQuickDeploy.Controls.Add(this.label11);
-            this.gbQuickDeploy.Controls.Add(this.tbLabel);
-            this.gbQuickDeploy.Controls.Add(this.cbDiagStorage);
-            this.gbQuickDeploy.Controls.Add(this.label10);
-            this.gbQuickDeploy.Controls.Add(this.pictureBox1);
-            this.gbQuickDeploy.Controls.Add(this.btnDeploy);
-            this.gbQuickDeploy.Controls.Add(this.cbUpgradePreference);
-            this.gbQuickDeploy.Controls.Add(this.label9);
-            this.gbQuickDeploy.Controls.Add(this.label8);
-            this.gbQuickDeploy.Controls.Add(this.cbSlot);
-            this.gbQuickDeploy.Controls.Add(this.lblSelectedDiag);
-            this.gbQuickDeploy.Controls.Add(this.lblSelectedConfig);
-            this.gbQuickDeploy.Controls.Add(this.lblSelectedPackage);
-            this.gbQuickDeploy.Controls.Add(this.label7);
-            this.gbQuickDeploy.Controls.Add(this.label6);
-            this.gbQuickDeploy.Controls.Add(this.label5);
-            this.gbQuickDeploy.Controls.Add(this.btnBrowseDiagnostics);
-            this.gbQuickDeploy.Controls.Add(this.btnBrowseCloudConfig);
-            this.gbQuickDeploy.Controls.Add(this.btnBrowseCloudPackage);
-            this.gbQuickDeploy.Controls.Add(this.label4);
-            this.gbQuickDeploy.Controls.Add(this.cbPackageStorage);
-            this.gbQuickDeploy.Controls.Add(this.cbCloudservices);
-            this.gbQuickDeploy.Controls.Add(this.label3);
-            this.gbQuickDeploy.Controls.Add(this.label2);
-            this.gbQuickDeploy.Controls.Add(this.cbSubscriptions);
-            this.gbQuickDeploy.Location = new System.Drawing.Point(12, 89);
-            this.gbQuickDeploy.Name = "gbQuickDeploy";
-            this.gbQuickDeploy.Size = new System.Drawing.Size(613, 388);
-            this.gbQuickDeploy.TabIndex = 4;
-            this.gbQuickDeploy.TabStop = false;
-            this.gbQuickDeploy.Tag = "KEEP_ENABLED";
-            this.gbQuickDeploy.Text = "Quick Deploy";
-            // 
-            // btnDownloadExistingPackage
-            // 
-            this.btnDownloadExistingPackage.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDownloadExistingPackage.Location = new System.Drawing.Point(402, 105);
-            this.btnDownloadExistingPackage.Name = "btnDownloadExistingPackage";
-            this.btnDownloadExistingPackage.Size = new System.Drawing.Size(107, 48);
-            this.btnDownloadExistingPackage.TabIndex = 33;
-            this.btnDownloadExistingPackage.Text = "Download existing package...";
-            this.btnDownloadExistingPackage.UseVisualStyleBackColor = true;
-            this.btnDownloadExistingPackage.Click += new System.EventHandler(this.HandleDownloadPackageClicked);
-            // 
-            // pictureBox2
-            // 
-            this.pictureBox2.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pictureBox2.Image = global::AzureCloudserviceDeployer.Properties.Resources.Infoicon;
-            this.pictureBox2.Location = new System.Drawing.Point(402, 300);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(16, 16);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox2.TabIndex = 32;
-            this.pictureBox2.TabStop = false;
-            this.pictureBox2.Tag = "KEEP_ENABLED";
-            this.toolTip1.SetToolTip(this.pictureBox2, "Label variables are updated when Deploy is clicked. Available tags: UTCDT, MACHIN" +
-        "E, USER");
-            this.pictureBox2.Click += new System.EventHandler(this.HandleTooltipClick);
-            // 
-            // lblLabelPreview
-            // 
-            this.lblLabelPreview.AutoSize = true;
-            this.lblLabelPreview.Location = new System.Drawing.Point(164, 321);
-            this.lblLabelPreview.Name = "lblLabelPreview";
-            this.lblLabelPreview.Size = new System.Drawing.Size(56, 13);
-            this.lblLabelPreview.TabIndex = 31;
-            this.lblLabelPreview.Text = "<preview>";
-            this.toolTip1.SetToolTip(this.lblLabelPreview, "Click here to copy the previewed label to clipboard");
-            this.lblLabelPreview.Click += new System.EventHandler(this.HandleLabelPreviewClicked);
-            // 
-            // lblPreview
-            // 
-            this.lblPreview.AutoSize = true;
-            this.lblPreview.Location = new System.Drawing.Point(110, 321);
-            this.lblPreview.Name = "lblPreview";
-            this.lblPreview.Size = new System.Drawing.Size(48, 13);
-            this.lblPreview.TabIndex = 30;
-            this.lblPreview.Text = "Preview:";
-            this.toolTip1.SetToolTip(this.lblPreview, "Click here to copy the previewed label to clipboard");
-            this.lblPreview.Click += new System.EventHandler(this.HandleLabelPreviewClicked);
-            // 
-            // btnClearDiagConfig
-            // 
-            this.btnClearDiagConfig.Location = new System.Drawing.Point(207, 240);
-            this.btnClearDiagConfig.Name = "btnClearDiagConfig";
-            this.btnClearDiagConfig.Size = new System.Drawing.Size(27, 23);
-            this.btnClearDiagConfig.TabIndex = 29;
-            this.btnClearDiagConfig.Text = "X";
-            this.btnClearDiagConfig.UseVisualStyleBackColor = true;
-            this.btnClearDiagConfig.Click += new System.EventHandler(this.HandleClearDiagConfig);
-            // 
-            // btnClearCloudConfig
-            // 
-            this.btnClearCloudConfig.Location = new System.Drawing.Point(207, 211);
-            this.btnClearCloudConfig.Name = "btnClearCloudConfig";
-            this.btnClearCloudConfig.Size = new System.Drawing.Size(27, 23);
-            this.btnClearCloudConfig.TabIndex = 28;
-            this.btnClearCloudConfig.Text = "X";
-            this.btnClearCloudConfig.UseVisualStyleBackColor = true;
-            this.btnClearCloudConfig.Click += new System.EventHandler(this.HandleClearCloudConfig);
-            // 
-            // btnClearCloudPackage
-            // 
-            this.btnClearCloudPackage.Location = new System.Drawing.Point(207, 182);
-            this.btnClearCloudPackage.Name = "btnClearCloudPackage";
-            this.btnClearCloudPackage.Size = new System.Drawing.Size(27, 23);
-            this.btnClearCloudPackage.TabIndex = 27;
-            this.btnClearCloudPackage.Text = "X";
-            this.btnClearCloudPackage.UseVisualStyleBackColor = true;
-            this.btnClearCloudPackage.Click += new System.EventHandler(this.HandleClearCloudPackage);
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(9, 300);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(36, 13);
-            this.label11.TabIndex = 25;
-            this.label11.Text = "Label:";
-            // 
-            // tbLabel
-            // 
-            this.tbLabel.Location = new System.Drawing.Point(113, 297);
-            this.tbLabel.Name = "tbLabel";
-            this.tbLabel.Size = new System.Drawing.Size(283, 20);
-            this.tbLabel.TabIndex = 24;
-            this.tbLabel.Text = "[UTCDT] [MACHINE] [USER] ";
-            this.tbLabel.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HandleLabelKeyUp);
-            // 
-            // cbDiagStorage
-            // 
-            this.cbDiagStorage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbDiagStorage.FormattingEnabled = true;
-            this.cbDiagStorage.Location = new System.Drawing.Point(113, 269);
-            this.cbDiagStorage.Name = "cbDiagStorage";
-            this.cbDiagStorage.Size = new System.Drawing.Size(283, 21);
-            this.cbDiagStorage.TabIndex = 23;
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(9, 272);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(73, 13);
-            this.label10.TabIndex = 22;
-            this.label10.Text = "Diag. storage:";
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pictureBox1.Image = global::AzureCloudserviceDeployer.Properties.Resources.Infoicon;
-            this.pictureBox1.Location = new System.Drawing.Point(402, 81);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(16, 16);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 21;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Tag = "KEEP_ENABLED";
-            this.toolTip1.SetToolTip(this.pictureBox1, "This storage account is only used for temporary storage to upload the package. No" +
-        "t for diagnostics. So it doesn\'t really matter what this is set to.");
-            this.pictureBox1.Click += new System.EventHandler(this.HandleTooltipClick);
-            // 
-            // btnDeploy
-            // 
-            this.btnDeploy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDeploy.Location = new System.Drawing.Point(113, 341);
-            this.btnDeploy.Name = "btnDeploy";
-            this.btnDeploy.Size = new System.Drawing.Size(142, 35);
-            this.btnDeploy.TabIndex = 19;
-            this.btnDeploy.Text = "Deploy";
-            this.btnDeploy.UseVisualStyleBackColor = true;
-            this.btnDeploy.Click += new System.EventHandler(this.HandleDeployClicked);
-            // 
-            // cbUpgradePreference
-            // 
-            this.cbUpgradePreference.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbUpgradePreference.FormattingEnabled = true;
-            this.cbUpgradePreference.Location = new System.Drawing.Point(113, 132);
-            this.cbUpgradePreference.Name = "cbUpgradePreference";
-            this.cbUpgradePreference.Size = new System.Drawing.Size(283, 21);
-            this.cbUpgradePreference.TabIndex = 18;
-            this.cbUpgradePreference.SelectedIndexChanged += new System.EventHandler(this.HandleDeploymentTypeChanged);
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(9, 135);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(89, 13);
-            this.label9.TabIndex = 17;
-            this.label9.Text = "Deployment type:";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(9, 108);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(28, 13);
-            this.label8.TabIndex = 16;
-            this.label8.Text = "Slot:";
-            // 
-            // cbSlot
-            // 
-            this.cbSlot.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbSlot.FormattingEnabled = true;
-            this.cbSlot.Location = new System.Drawing.Point(113, 105);
-            this.cbSlot.Name = "cbSlot";
-            this.cbSlot.Size = new System.Drawing.Size(283, 21);
-            this.cbSlot.TabIndex = 15;
-            this.cbSlot.SelectedIndexChanged += new System.EventHandler(this.HandleSlotChanged);
-            // 
-            // lblSelectedDiag
-            // 
-            this.lblSelectedDiag.AutoEllipsis = true;
-            this.lblSelectedDiag.Location = new System.Drawing.Point(240, 245);
-            this.lblSelectedDiag.Name = "lblSelectedDiag";
-            this.lblSelectedDiag.Size = new System.Drawing.Size(367, 13);
-            this.lblSelectedDiag.TabIndex = 14;
-            this.lblSelectedDiag.Text = "<selected diag>";
-            // 
-            // lblSelectedConfig
-            // 
-            this.lblSelectedConfig.AutoEllipsis = true;
-            this.lblSelectedConfig.Location = new System.Drawing.Point(240, 216);
-            this.lblSelectedConfig.Name = "lblSelectedConfig";
-            this.lblSelectedConfig.Size = new System.Drawing.Size(367, 13);
-            this.lblSelectedConfig.TabIndex = 13;
-            this.lblSelectedConfig.Text = "<selected config>";
-            // 
-            // lblSelectedPackage
-            // 
-            this.lblSelectedPackage.AutoEllipsis = true;
-            this.lblSelectedPackage.Location = new System.Drawing.Point(240, 187);
-            this.lblSelectedPackage.Name = "lblSelectedPackage";
-            this.lblSelectedPackage.Size = new System.Drawing.Size(367, 13);
-            this.lblSelectedPackage.TabIndex = 12;
-            this.lblSelectedPackage.Text = "<selected package>";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(9, 245);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(97, 13);
-            this.label7.TabIndex = 11;
-            this.label7.Text = "Diagnostics config:";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(9, 216);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(69, 13);
-            this.label6.TabIndex = 10;
-            this.label6.Text = "Cloud config:";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 187);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(82, 13);
-            this.label5.TabIndex = 9;
-            this.label5.Text = "Cloud package:";
-            // 
-            // btnBrowseDiagnostics
-            // 
-            this.btnBrowseDiagnostics.Location = new System.Drawing.Point(113, 240);
-            this.btnBrowseDiagnostics.Name = "btnBrowseDiagnostics";
-            this.btnBrowseDiagnostics.Size = new System.Drawing.Size(88, 23);
-            this.btnBrowseDiagnostics.TabIndex = 8;
-            this.btnBrowseDiagnostics.Text = "Browse...";
-            this.btnBrowseDiagnostics.UseVisualStyleBackColor = true;
-            this.btnBrowseDiagnostics.Click += new System.EventHandler(this.HandleSelectCloudDiag);
-            // 
-            // btnBrowseCloudConfig
-            // 
-            this.btnBrowseCloudConfig.Location = new System.Drawing.Point(113, 211);
-            this.btnBrowseCloudConfig.Name = "btnBrowseCloudConfig";
-            this.btnBrowseCloudConfig.Size = new System.Drawing.Size(88, 23);
-            this.btnBrowseCloudConfig.TabIndex = 7;
-            this.btnBrowseCloudConfig.Text = "Browse...";
-            this.btnBrowseCloudConfig.UseVisualStyleBackColor = true;
-            this.btnBrowseCloudConfig.Click += new System.EventHandler(this.HandleSelectCloudConfig);
-            // 
-            // btnBrowseCloudPackage
-            // 
-            this.btnBrowseCloudPackage.Location = new System.Drawing.Point(113, 182);
-            this.btnBrowseCloudPackage.Name = "btnBrowseCloudPackage";
-            this.btnBrowseCloudPackage.Size = new System.Drawing.Size(88, 23);
-            this.btnBrowseCloudPackage.TabIndex = 6;
-            this.btnBrowseCloudPackage.Text = "Browse...";
-            this.btnBrowseCloudPackage.UseVisualStyleBackColor = true;
-            this.btnBrowseCloudPackage.Click += new System.EventHandler(this.HandleSelectCloudPackage);
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(9, 81);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(91, 13);
-            this.label4.TabIndex = 5;
-            this.label4.Text = "Package storage:";
-            // 
-            // cbPackageStorage
-            // 
-            this.cbPackageStorage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbPackageStorage.FormattingEnabled = true;
-            this.cbPackageStorage.Location = new System.Drawing.Point(113, 78);
-            this.cbPackageStorage.Name = "cbPackageStorage";
-            this.cbPackageStorage.Size = new System.Drawing.Size(283, 21);
-            this.cbPackageStorage.TabIndex = 4;
-            this.cbPackageStorage.SelectedIndexChanged += new System.EventHandler(this.HandlePackagestorageChanged);
-            // 
-            // cbCloudservices
-            // 
-            this.cbCloudservices.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbCloudservices.FormattingEnabled = true;
-            this.cbCloudservices.Location = new System.Drawing.Point(113, 51);
-            this.cbCloudservices.Name = "cbCloudservices";
-            this.cbCloudservices.Size = new System.Drawing.Size(283, 21);
-            this.cbCloudservices.TabIndex = 3;
-            this.cbCloudservices.SelectedIndexChanged += new System.EventHandler(this.HandleCloudserviceChanged);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 54);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(71, 13);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "Cloudservice:";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 25);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(68, 13);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "Subscription:";
-            // 
-            // cbSubscriptions
-            // 
-            this.cbSubscriptions.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbSubscriptions.FormattingEnabled = true;
-            this.cbSubscriptions.Location = new System.Drawing.Point(113, 22);
-            this.cbSubscriptions.Name = "cbSubscriptions";
-            this.cbSubscriptions.Size = new System.Drawing.Size(283, 21);
-            this.cbSubscriptions.TabIndex = 0;
-            this.cbSubscriptions.SelectedIndexChanged += new System.EventHandler(this.HandleSubscriptionIndexChanged);
-            // 
             // lbLog
             // 
             this.lbLog.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -651,7 +262,7 @@
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.lbLog);
-            this.groupBox3.Location = new System.Drawing.Point(12, 483);
+            this.groupBox3.Location = new System.Drawing.Point(12, 523);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(613, 150);
             this.groupBox3.TabIndex = 6;
@@ -669,31 +280,97 @@
             this.toolTip1.UseAnimation = false;
             this.toolTip1.UseFading = false;
             // 
+            // btnClose
+            // 
+            this.btnClose.Location = new System.Drawing.Point(619, 85);
+            this.btnClose.Margin = new System.Windows.Forms.Padding(0);
+            this.btnClose.Name = "btnClose";
+            this.btnClose.Size = new System.Drawing.Size(17, 23);
+            this.btnClose.TabIndex = 7;
+            this.btnClose.TabStop = false;
+            this.btnClose.Text = "x";
+            this.toolTip1.SetToolTip(this.btnClose, "Close Selected Tab");
+            this.btnClose.UseVisualStyleBackColor = true;
+            this.btnClose.Click += new System.EventHandler(this.HandleClosePage);
+            // 
             // notifyIcon1
             // 
             this.notifyIcon1.Text = "AzureCloudserviceDeployer";
             this.notifyIcon1.Visible = true;
             // 
-            // cbForceUpgrade
+            // tabControl1
             // 
-            this.cbForceUpgrade.AutoSize = true;
-            this.cbForceUpgrade.Checked = true;
-            this.cbForceUpgrade.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbForceUpgrade.Location = new System.Drawing.Point(113, 159);
-            this.cbForceUpgrade.Name = "cbForceUpgrade";
-            this.cbForceUpgrade.Size = new System.Drawing.Size(275, 17);
-            this.cbForceUpgrade.TabIndex = 35;
-            this.cbForceUpgrade.Text = "Force upgrade if role size or number of roles changes";
-            this.cbForceUpgrade.UseVisualStyleBackColor = true;
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
+            this.tabControl1.Location = new System.Drawing.Point(15, 88);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(607, 429);
+            this.tabControl1.TabIndex = 0;
+            this.tabControl1.Tag = "KEEP_ENABLED";
+            this.tabControl1.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.HandleDrawTab);
+            this.tabControl1.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.HandleTabSelecting);
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage1.Size = new System.Drawing.Size(599, 403);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Tag = "KEEP_ENABLED";
+            this.tabPage1.Text = "#1";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage2.Size = new System.Drawing.Size(599, 403);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "+";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // presetsToolStripMenuItem
+            // 
+            this.presetsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.savePresetToolStripMenuItem,
+            this.restorePresetToolStripMenuItem,
+            this.toolStripSeparator3});
+            this.presetsToolStripMenuItem.Name = "presetsToolStripMenuItem";
+            this.presetsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
+            this.presetsToolStripMenuItem.Text = "Presets";
+            // 
+            // savePresetToolStripMenuItem
+            // 
+            this.savePresetToolStripMenuItem.Name = "savePresetToolStripMenuItem";
+            this.savePresetToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.savePresetToolStripMenuItem.Text = "Save preset...";
+            this.savePresetToolStripMenuItem.Click += new System.EventHandler(this.HandleSavePresetClicked);
+            // 
+            // restorePresetToolStripMenuItem
+            // 
+            this.restorePresetToolStripMenuItem.Name = "restorePresetToolStripMenuItem";
+            this.restorePresetToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.restorePresetToolStripMenuItem.Text = "Restore preset...";
+            this.restorePresetToolStripMenuItem.Click += new System.EventHandler(this.HandleRestorePresetClicked);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(154, 6);
             // 
             // MainForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(637, 643);
+            this.ClientSize = new System.Drawing.Size(637, 685);
+            this.Controls.Add(this.btnClose);
+            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.gbQuickDeploy);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -704,18 +381,13 @@
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Azure Cloudservice Deployer";
             this.Shown += new System.EventHandler(this.HandleMainformShown);
-            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
-            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
-            this.gbQuickDeploy.ResumeLayout(false);
-            this.gbQuickDeploy.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.groupBox3.ResumeLayout(false);
+            this.tabControl1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -734,45 +406,12 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label lblLoggedInUser;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private System.Windows.Forms.GroupBox gbQuickDeploy;
-        private System.Windows.Forms.Label lblSelectedDiag;
-        private System.Windows.Forms.Label lblSelectedConfig;
-        private System.Windows.Forms.Label lblSelectedPackage;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Button btnBrowseDiagnostics;
-        private System.Windows.Forms.Button btnBrowseCloudConfig;
-        private System.Windows.Forms.Button btnBrowseCloudPackage;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ComboBox cbPackageStorage;
-        private System.Windows.Forms.ComboBox cbCloudservices;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ComboBox cbSubscriptions;
-        private System.Windows.Forms.ComboBox cbSlot;
-        private System.Windows.Forms.ComboBox cbUpgradePreference;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Button btnDeploy;
         private System.Windows.Forms.ListBox lbLog;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.ComboBox cbDiagStorage;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.TextBox tbLabel;
-        private System.Windows.Forms.Button btnClearDiagConfig;
-        private System.Windows.Forms.Button btnClearCloudConfig;
-        private System.Windows.Forms.Button btnClearCloudPackage;
-        private System.Windows.Forms.Label lblLabelPreview;
-        private System.Windows.Forms.Label lblPreview;
-        private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem optionCleanupUnusedExtensionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem submitFeedbacknotYetAvailableToolStripMenuItem;
-        private System.Windows.Forms.Button btnDownloadExistingPackage;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem optionAutodownloadExistingPackageBeforeDeployingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem optionConfigureDownloadPathToolStripMenuItem;
@@ -780,7 +419,14 @@
         private System.Windows.Forms.ToolStripMenuItem flashApplicationToolStripMenuItem;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.ToolStripMenuItem showNotificationWhenDoneToolStripMenuItem;
-        private System.Windows.Forms.CheckBox cbForceUpgrade;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.ToolStripMenuItem presetsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem savePresetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem restorePresetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
     }
 }
 

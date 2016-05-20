@@ -38,5 +38,8 @@ namespace AzureCloudserviceDeployer
 
         [XmlElement]
         public bool NotifyWhenDone { get; set; } = true;
+
+        [XmlElement]
+        public List<string> MostRecentlyUsedPresets { get; set; } = new List<string>();
     }
 }
