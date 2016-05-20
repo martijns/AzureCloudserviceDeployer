@@ -166,7 +166,7 @@ namespace AzureCloudserviceDeployer
             }
         }
 
-        internal void ColorTab(string id, Color color)
+        internal void ColorTab(string id, Color? color)
         {
             var tab = tabControl1.TabPages.Cast<TabPage>().Where(t => t.Text == id).FirstOrDefault();
             if (tab != null)

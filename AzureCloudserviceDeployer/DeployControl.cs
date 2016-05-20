@@ -103,13 +103,11 @@ namespace AzureCloudserviceDeployer
         private async void HandleDeployClicked(object sender, EventArgs e)
         {
             Logger.Debug("[" + _id + "] " + "HandleDeployClicked");
+            _parent.ColorTab(_id, null);
             await PerformWorkAsync(bgwork: null, fgwork: async () =>
             {
                 try
                 {
-                    //await Task.Delay(5000);
-                    //return;
-
                     var subscription = cbSubscriptions.SelectedItem as SubscriptionListOperationResponse.Subscription;
                     var service = cbCloudservices.SelectedItem as HostedServiceListResponse.HostedService;
                     var packageStorage = cbPackageStorage.SelectedItem as StorageAccount;
@@ -353,6 +351,7 @@ namespace AzureCloudserviceDeployer
         private async void HandleDownloadPackageClicked(object sender, EventArgs e)
         {
             LogMethodEntry();
+            _parent.ColorTab(_id, null);
             await PerformWorkAsync(null, async () =>
             {
                 var subscription = cbSubscriptions.SelectedItem as SubscriptionListOperationResponse.Subscription;
