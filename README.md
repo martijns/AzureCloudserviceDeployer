@@ -11,7 +11,7 @@ http://martijn.tikkie.net/apps/AzureCloudserviceDeployer/AzureCloudserviceDeploy
 
 ## Screenshots
 
-![screenshot](http://i.snag.gy/BNfzG.jpg)
+![screenshot](http://www.tikkie.net/p/2016-05-20_101154.png)
 
 ## Main features
 
