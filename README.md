@@ -25,6 +25,8 @@ http://martijn.tikkie.net/apps/AzureCloudserviceDeployer/AzureCloudserviceDeploy
   * Delete/create deployment, but keep in stopped state
 * Download existing package for a cloudservice, including PaaSDiagnostics PubConfig if enabled for that cloudservice
 * Automatically remove unused extensions still registered for that cloudservice
+* Save and load presets in JSON format with a MRU list
+* Multiple tabs/deployments simultaneously
 
 ## Changelog
 
