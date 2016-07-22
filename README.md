@@ -61,6 +61,8 @@ As employee of [ICT](http://www.ict.eu) there is some special support for the wa
 </html>
 ```
 
+NOTE: Technically it just scans for <td> tags and takes the content of the 2nd, 4th and 6th one it finds and trims spaces, tabs, newlines and the colon.
+
 ## Changelog
 
 See changes.txt in the source code, or Help => Changelog within the application.
