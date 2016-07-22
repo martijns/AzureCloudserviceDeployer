@@ -17,6 +17,7 @@ using System.IO;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Storage;
 using Newtonsoft.Json;
+using AzureCloudserviceDeployer.Helpers;
 
 namespace AzureCloudserviceDeployer
 {
@@ -39,6 +40,8 @@ namespace AzureCloudserviceDeployer
             UpdateFormState();
             lblLabelPreview.Text = GetRenderedLabel();
             Tag = "KEEP_ENABLED";
+            tbLabel.Text = Configuration.Instance.DefaultDeploymentLabel;
+            lblLabelPreview.Text = GetRenderedLabel();
         }
 
         private void HandleTooltipClick(object sender, EventArgs e)
@@ -261,6 +264,7 @@ namespace AzureCloudserviceDeployer
             lblSelectedPackage.Text = Path.GetFileName(_selectedPackage);
             lblSelectedConfig.Text = Path.GetFileName(_selectedConfig);
             lblSelectedDiag.Text = Path.GetFileName(_selectedDiag);
+            lblLabelPreview.Text = GetRenderedLabel();
         }
 
         public async Task UpdateSubscriptions(string userAccount)
@@ -300,7 +304,6 @@ namespace AzureCloudserviceDeployer
 
                 // Load cloudservices
                 var hostedservices = await AzureHelper.GetCloudservicesAsync(_id, subscription);
-                //AzureHelper.Test(subscription);
                 cbCloudservices.Items.Clear();
                 foreach (var service in hostedservices.OrderBy(s => s.ServiceName))
                 {
@@ -401,6 +404,25 @@ namespace AzureCloudserviceDeployer
         private string GetRenderedLabel()
         {
             string label = tbLabel.Text;
+
+            if (_selectedPackage != null && File.Exists(_selectedPackage) && label.Contains("[ICT"))
+            {
+                try
+                {
+                    ICTVersionData vdata = ICTVersionHelper.FindAndParseVersion(_selectedPackage);
+                    if (vdata != null)
+                    {
+                        label = label.Replace("[ICTBUILDNUMBER]", vdata.BuildNumberSimplified);
+                        label = label.Replace("[ICTBUILDDATE]", vdata.Date);
+                        label = label.Replace("[ICTENVIRONMENT]", vdata.Environment);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn("[" + _id + "] " + "Error checking package for versioning info, is it a valid package? See logfile for exception.", ex);
+                }
+            }
+
             label = label.Replace("[UTCDT]", DateTime.UtcNow.ToString("u"));
             label = label.Replace("[MACHINE]", Environment.MachineName);
             label = label.Replace("[USER]", Environment.UserName);
@@ -504,6 +526,7 @@ namespace AzureCloudserviceDeployer
             UpdateSelectedFiles(state.CloudPackage);
             UpdateSelectedFiles(state.CloudConfig);
             UpdateSelectedFiles(state.DiagConfig);
+            lblLabelPreview.Text = GetRenderedLabel();
         }
     }
 }

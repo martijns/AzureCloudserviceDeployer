@@ -63,7 +63,7 @@ namespace AzureCloudserviceDeployer
             if (val == null)
             {
                 Logger.Debug("[" + source + "] " + "Data not in cache, fetching and adding (key=" + key + ")");
-                val = await func().ConfigureAwait(false);
+                val = await func().ConfigureAwait(true);
                 _cache.Set(key, val, DateTime.UtcNow.AddHours(1));
             }
             else

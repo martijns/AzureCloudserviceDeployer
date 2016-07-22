@@ -27,6 +27,39 @@ http://martijn.tikkie.net/apps/AzureCloudserviceDeployer/AzureCloudserviceDeploy
 * Automatically remove unused extensions still registered for that cloudservice
 * Save and load presets in JSON format with a MRU list
 * Multiple tabs/deployments simultaneously
+* Extract label from cspkg on supported format
+
+## Extract version from .cspkg
+
+As employee of [ICT](http://www.ict.eu) there is some special support for the way we include versioning information in our builds and thus end up in the cspkg files. When the labels [ICTBUILDDATE], [ICTBUILDNUMBER] or [ICTENVIRONMENT] are being used, the cspkg is scanned for a "versie.htm" or "version.htm" file with a certain format. If found, the tags are replaced with the proper values from that file. An example of this file:
+
+```html
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <title></title>
+  </head>
+  <style>body, table, tr, td
+  {font-family:Arial;font-size:12px;}</style>
+  <body>
+    <table>
+      <tr>
+        <td>build number</td>
+        <td>: $/Customer/Product/Dev/Branchname@12345</td>
+      </tr>
+      <tr>
+        <td>datum</td>
+        <td>: 2016-06-13 03:21:22.954</td>
+      </tr>
+      <tr>
+        <td>omgeving</td>
+        <td>: WA-P</td>
+      </tr>
+    </table>
+  </body>
+</html>
+```
 
 ## Changelog
 

@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCloudserviceDeployer", "AzureCloudserviceDeployer\AzureCloudserviceDeployer.csproj", "{5772CBAF-8DFD-462E-AF24-0B663A905384}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsCommon.ClickOnce", "MsCommon.ClickOnce\MsCommon.ClickOnce.csproj", "{28AFF2BB-79A2-46A2-9EF0-202B188AA028}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ABE43756-2FFB-4607-B99E-50568BE9B6FE}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

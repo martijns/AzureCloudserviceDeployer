@@ -41,6 +41,10 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.flashApplicationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showNotificationWhenDoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.presetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.savePresetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restorePresetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.changelogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.submitFeedbacknotYetAvailableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,10 +62,8 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.presetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.savePresetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.restorePresetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.optionConfigureDefaultLabel = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
@@ -78,7 +80,8 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(637, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(849, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -93,7 +96,7 @@
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(92, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.HandleExitClicked);
             // 
@@ -106,7 +109,9 @@
             this.optionConfigureDownloadPathToolStripMenuItem,
             this.toolStripSeparator2,
             this.flashApplicationToolStripMenuItem,
-            this.showNotificationWhenDoneToolStripMenuItem});
+            this.showNotificationWhenDoneToolStripMenuItem,
+            this.toolStripSeparator4,
+            this.optionConfigureDefaultLabel});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -162,6 +167,35 @@
             this.showNotificationWhenDoneToolStripMenuItem.Text = "Show notification when done";
             this.showNotificationWhenDoneToolStripMenuItem.Click += new System.EventHandler(this.HandleShowNotificationWhenDoneClicked);
             // 
+            // presetsToolStripMenuItem
+            // 
+            this.presetsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.savePresetToolStripMenuItem,
+            this.restorePresetToolStripMenuItem,
+            this.toolStripSeparator3});
+            this.presetsToolStripMenuItem.Name = "presetsToolStripMenuItem";
+            this.presetsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
+            this.presetsToolStripMenuItem.Text = "Presets";
+            // 
+            // savePresetToolStripMenuItem
+            // 
+            this.savePresetToolStripMenuItem.Name = "savePresetToolStripMenuItem";
+            this.savePresetToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.savePresetToolStripMenuItem.Text = "Save preset...";
+            this.savePresetToolStripMenuItem.Click += new System.EventHandler(this.HandleSavePresetClicked);
+            // 
+            // restorePresetToolStripMenuItem
+            // 
+            this.restorePresetToolStripMenuItem.Name = "restorePresetToolStripMenuItem";
+            this.restorePresetToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.restorePresetToolStripMenuItem.Text = "Restore preset...";
+            this.restorePresetToolStripMenuItem.Click += new System.EventHandler(this.HandleRestorePresetClicked);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(154, 6);
+            // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -195,9 +229,10 @@
             // 
             // btnChangeUser
             // 
-            this.btnChangeUser.Location = new System.Drawing.Point(134, 3);
+            this.btnChangeUser.Location = new System.Drawing.Point(157, 4);
+            this.btnChangeUser.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnChangeUser.Name = "btnChangeUser";
-            this.btnChangeUser.Size = new System.Drawing.Size(107, 23);
+            this.btnChangeUser.Size = new System.Drawing.Size(143, 28);
             this.btnChangeUser.TabIndex = 1;
             this.btnChangeUser.Text = "Authenticate...";
             this.btnChangeUser.UseVisualStyleBackColor = true;
@@ -206,19 +241,21 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 8);
-            this.label1.Margin = new System.Windows.Forms.Padding(3, 8, 3, 8);
+            this.label1.Location = new System.Drawing.Point(4, 10);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 10, 4, 10);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(71, 13);
+            this.label1.Size = new System.Drawing.Size(89, 16);
             this.label1.TabIndex = 2;
             this.label1.Text = "Logged in as:";
             // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.flowLayoutPanel1);
-            this.groupBox1.Location = new System.Drawing.Point(12, 27);
+            this.groupBox1.Location = new System.Drawing.Point(16, 33);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(613, 55);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Size = new System.Drawing.Size(817, 68);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Authentication";
@@ -229,17 +266,18 @@
             this.flowLayoutPanel1.Controls.Add(this.lblLoggedInUser);
             this.flowLayoutPanel1.Controls.Add(this.btnChangeUser);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 16);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(4, 19);
+            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(607, 36);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(809, 45);
             this.flowLayoutPanel1.TabIndex = 4;
             // 
             // lblLoggedInUser
             // 
             this.lblLoggedInUser.AutoSize = true;
             this.lblLoggedInUser.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLoggedInUser.Location = new System.Drawing.Point(80, 8);
-            this.lblLoggedInUser.Margin = new System.Windows.Forms.Padding(3, 8, 3, 8);
+            this.lblLoggedInUser.Location = new System.Drawing.Point(101, 10);
+            this.lblLoggedInUser.Margin = new System.Windows.Forms.Padding(4, 10, 4, 10);
             this.lblLoggedInUser.Name = "lblLoggedInUser";
             this.lblLoggedInUser.Size = new System.Drawing.Size(48, 13);
             this.lblLoggedInUser.TabIndex = 3;
@@ -252,19 +290,22 @@
             this.lbLog.FormattingEnabled = true;
             this.lbLog.HorizontalScrollbar = true;
             this.lbLog.ItemHeight = 12;
-            this.lbLog.Location = new System.Drawing.Point(3, 16);
+            this.lbLog.Location = new System.Drawing.Point(4, 19);
+            this.lbLog.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lbLog.Name = "lbLog";
             this.lbLog.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbLog.Size = new System.Drawing.Size(607, 131);
+            this.lbLog.Size = new System.Drawing.Size(809, 162);
             this.lbLog.TabIndex = 5;
             this.lbLog.Tag = "KEEP_ENABLED";
             // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.lbLog);
-            this.groupBox3.Location = new System.Drawing.Point(12, 523);
+            this.groupBox3.Location = new System.Drawing.Point(16, 644);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(613, 150);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox3.Size = new System.Drawing.Size(817, 185);
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
             this.groupBox3.Tag = "KEEP_ENABLED";
@@ -282,10 +323,10 @@
             // 
             // btnClose
             // 
-            this.btnClose.Location = new System.Drawing.Point(619, 85);
+            this.btnClose.Location = new System.Drawing.Point(825, 105);
             this.btnClose.Margin = new System.Windows.Forms.Padding(0);
             this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new System.Drawing.Size(17, 23);
+            this.btnClose.Size = new System.Drawing.Size(23, 28);
             this.btnClose.TabIndex = 7;
             this.btnClose.TabStop = false;
             this.btnClose.Text = "x";
@@ -303,10 +344,11 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
-            this.tabControl1.Location = new System.Drawing.Point(15, 88);
+            this.tabControl1.Location = new System.Drawing.Point(20, 108);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(607, 429);
+            this.tabControl1.Size = new System.Drawing.Size(809, 528);
             this.tabControl1.TabIndex = 0;
             this.tabControl1.Tag = "KEEP_ENABLED";
             this.tabControl1.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.HandleDrawTab);
@@ -314,10 +356,11 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Location = new System.Drawing.Point(4, 25);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage1.Size = new System.Drawing.Size(599, 403);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage1.Size = new System.Drawing.Size(801, 499);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Tag = "KEEP_ENABLED";
             this.tabPage1.Text = "#1";
@@ -325,49 +368,33 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Location = new System.Drawing.Point(4, 25);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage2.Size = new System.Drawing.Size(599, 403);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage2.Size = new System.Drawing.Size(801, 499);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "+";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // presetsToolStripMenuItem
+            // toolStripSeparator4
             // 
-            this.presetsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.savePresetToolStripMenuItem,
-            this.restorePresetToolStripMenuItem,
-            this.toolStripSeparator3});
-            this.presetsToolStripMenuItem.Name = "presetsToolStripMenuItem";
-            this.presetsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
-            this.presetsToolStripMenuItem.Text = "Presets";
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(366, 6);
             // 
-            // savePresetToolStripMenuItem
+            // optionConfigureDefaultLabel
             // 
-            this.savePresetToolStripMenuItem.Name = "savePresetToolStripMenuItem";
-            this.savePresetToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
-            this.savePresetToolStripMenuItem.Text = "Save preset...";
-            this.savePresetToolStripMenuItem.Click += new System.EventHandler(this.HandleSavePresetClicked);
-            // 
-            // restorePresetToolStripMenuItem
-            // 
-            this.restorePresetToolStripMenuItem.Name = "restorePresetToolStripMenuItem";
-            this.restorePresetToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
-            this.restorePresetToolStripMenuItem.Text = "Restore preset...";
-            this.restorePresetToolStripMenuItem.Click += new System.EventHandler(this.HandleRestorePresetClicked);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(154, 6);
+            this.optionConfigureDefaultLabel.Name = "optionConfigureDefaultLabel";
+            this.optionConfigureDefaultLabel.Size = new System.Drawing.Size(369, 22);
+            this.optionConfigureDefaultLabel.Text = "Configure default label...";
+            this.optionConfigureDefaultLabel.Click += new System.EventHandler(this.HandleOptionConfigureDefaultLabelClicked);
             // 
             // MainForm
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(637, 685);
+            this.ClientSize = new System.Drawing.Size(849, 843);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.groupBox3);
@@ -376,6 +403,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
@@ -427,6 +455,8 @@
         private System.Windows.Forms.ToolStripMenuItem savePresetToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem restorePresetToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem optionConfigureDefaultLabel;
     }
 }
 

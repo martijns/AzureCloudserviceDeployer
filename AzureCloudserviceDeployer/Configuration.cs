@@ -41,5 +41,8 @@ namespace AzureCloudserviceDeployer
 
         [XmlElement]
         public List<string> MostRecentlyUsedPresets { get; set; } = new List<string>();
+
+        [XmlElement]
+        public string DefaultDeploymentLabel { get; set; } = "[UTCDT] [MACHINE] [USER] ";
     }
 }

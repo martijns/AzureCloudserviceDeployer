@@ -360,5 +360,10 @@ namespace AzureCloudserviceDeployer
                 return;
             RestorePresetFromFile(item.Tag as string);
         }
+
+        private void HandleOptionConfigureDefaultLabelClicked(object sender, EventArgs e)
+        {
+            new ConfigureLabelForm().ShowDialog(this);
+        }
     }
 }
