@@ -1,4 +1,7 @@
-﻿2016-07-22:
+﻿2016-09-29:
+- CHG: Updated app with new code signing cert
+
+2016-07-22:
 - NEW: Change the default label and add support for ICT-specific label tags
 
 2016-05-20:
