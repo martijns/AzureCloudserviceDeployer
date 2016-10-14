@@ -1,4 +1,7 @@
-﻿2016-09-29:
+﻿2016-10-14:
+- FIX: Restoring a preset with files that (no longer) exist caused an error. Those files will now simply not load.
+
+2016-09-29:
 - CHG: Updated app with new code signing cert
 
 2016-07-22:

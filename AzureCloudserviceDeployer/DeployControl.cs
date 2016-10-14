@@ -248,7 +248,7 @@ namespace AzureCloudserviceDeployer
         private void UpdateSelectedFiles(string path)
         {
             LogMethodEntry();
-            if (path == null)
+            if (path == null || !File.Exists(path))
                 return;
             if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
             {
