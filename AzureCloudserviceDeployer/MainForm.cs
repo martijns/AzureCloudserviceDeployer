@@ -249,7 +249,7 @@ namespace AzureCloudserviceDeployer
                 var state = control.PersistState();
                 states.Add(state);
             }
-            string statesJson = JsonConvert.SerializeObject(states.ToArray());
+            string statesJson = JsonConvert.SerializeObject(states.ToArray(), Formatting.Indented);
 
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filter = "ACD Preset File (*.acdpreset)|*.acdpreset|All files (*.*)|*.*";
@@ -339,8 +339,8 @@ namespace AzureCloudserviceDeployer
                 Configuration.Instance.Save();
             }
 
-            while (presetsToolStripMenuItem.DropDownItems.Count > 3)
-                presetsToolStripMenuItem.DropDownItems.RemoveAt(3);
+            while (presetsToolStripMenuItem.DropDownItems.Count > 6)
+                presetsToolStripMenuItem.DropDownItems.RemoveAt(6);
 
             foreach (string path in Configuration.Instance.MostRecentlyUsedPresets)
             {
@@ -364,6 +364,13 @@ namespace AzureCloudserviceDeployer
         private void HandleOptionConfigureDefaultLabelClicked(object sender, EventArgs e)
         {
             new ConfigureLabelForm().ShowDialog(this);
+        }
+
+        private void HandleClearMRUList(object sender, EventArgs e)
+        {
+            Configuration.Instance.MostRecentlyUsedPresets.Clear();
+            Configuration.Instance.Save();
+            UpdatePresetsMRU();
         }
     }
 }

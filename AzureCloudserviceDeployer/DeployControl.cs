@@ -245,16 +245,44 @@ namespace AzureCloudserviceDeployer
             return dialog.FileName;
         }
 
-        private void UpdateSelectedFiles(string path)
+        private void UpdateSelectedFiles(params string[] paths)
         {
             LogMethodEntry();
-            if (path == null || !File.Exists(path))
+            if (paths == null)
                 return;
+
+            // Prepare a list of files
+            List<string> files = new List<string>();
+
+            // Loop through the paths we received and add any files in subdirs
+            foreach (var path in paths)
+            {
+                GetFilesRecursive(files, path);
+            }
+
+            // Sort the full list we end up with and process old => new
+            var tst = files.Where(f => File.Exists(f)).OrderBy(f => File.GetCreationTime(f)).ToList();
+            foreach (var file in tst)
+            {
+                UpdateSelectedFile(file);
+            }
+        }
+
+        private void GetFilesRecursive(List<string> entries, string path)
+        {
             if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
             {
-                foreach (var file in Directory.EnumerateFileSystemEntries(path))
-                    UpdateSelectedFiles(file);
+                foreach (var entry in Directory.EnumerateFileSystemEntries(path))
+                    GetFilesRecursive(entries, entry);
             }
+            else if (File.Exists(path))
+            {
+                entries.Add(path);
+            }
+        }
+
+        private void UpdateSelectedFile(string path)
+        { 
             if (path.EndsWith(".cspkg", StringComparison.OrdinalIgnoreCase))
                 _selectedPackage = path;
             if (path.EndsWith(".cscfg", StringComparison.OrdinalIgnoreCase))
@@ -445,8 +473,7 @@ namespace AzureCloudserviceDeployer
                 return;
 
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (var file in files)
-                UpdateSelectedFiles(file);
+            UpdateSelectedFiles(files);
         }
 
         private void UpdateFormState()
@@ -523,9 +550,7 @@ namespace AzureCloudserviceDeployer
                 cbDiagStorage.SelectedItem = cbDiagStorage.Items[0];
             cbForceUpgrade.Checked = state.ForceUpgrade;
             tbLabel.Text = state.Label;
-            UpdateSelectedFiles(state.CloudPackage);
-            UpdateSelectedFiles(state.CloudConfig);
-            UpdateSelectedFiles(state.DiagConfig);
+            UpdateSelectedFiles(state.CloudPackage, state.CloudConfig, state.DiagConfig);
             lblLabelPreview.Text = GetRenderedLabel();
         }
     }

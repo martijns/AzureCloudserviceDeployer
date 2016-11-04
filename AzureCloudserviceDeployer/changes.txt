@@ -1,4 +1,11 @@
-﻿2016-10-14:
+﻿2016-11-04:
+- CHG: Presets were already saved in Json format, but is now indented to improve readability.
+- NEW: Add ability to clear the Most Recently Used list of presets
+- CHG: Added dummy menu item to make clear that the list of presets is a MRU list instead of all presets that are available. Presets are not saved in the application, but saved as file on the file system.
+- NEW: Folders can now be dropped in the tool.
+- CHG: When editing presets manually, the CloudPackage, CloudConfig and DiagConfig values can be set to directories to scan for .cspkg, cscfg and .pubconfig.xml files.
+
+2016-10-14:
 - FIX: Restoring a preset with files that (no longer) exist caused an error. Those files will now simply not load.
 
 2016-09-29:
