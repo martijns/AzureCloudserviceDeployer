@@ -381,7 +381,7 @@
             this.pictureBox2.TabStop = false;
             this.pictureBox2.Tag = "KEEP_ENABLED";
             this.toolTip1.SetToolTip(this.pictureBox2, "Label variables are updated when Deploy is clicked. Available tags: UTCDT, MACHIN" +
-        "E, USER, ICTBUILDNUMBER, ICTBUILDDATE, ICTENVIRONMENT");
+        "E, USER, ICTBUILDNUMBER, ICTBUILDDATE, ICTENVIRONMENT, EMAIL");
             this.pictureBox2.Click += new System.EventHandler(this.HandleTooltipClick);
             // 
             // pictureBox1

@@ -515,11 +515,10 @@ namespace AzureCloudserviceDeployer
                 }
             }
 
-            var auth = AzureHelper.GetAuthentication("main", null, true);
-
             label = label.Replace("[UTCDT]", DateTime.UtcNow.ToString("u"));
             label = label.Replace("[MACHINE]", Environment.MachineName);
-            label = label.Replace("[USER]", auth.UserInfo.DisplayableId);
+            label = label.Replace("[USER]", Environment.UserName);
+            label = label.Replace("[EMAIL]", _parent.LoggedInUserEmail);
             return label;
         }
 

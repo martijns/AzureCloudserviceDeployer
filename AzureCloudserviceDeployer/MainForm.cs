@@ -45,6 +45,14 @@ namespace AzureCloudserviceDeployer
             showNotificationWhenDoneToolStripMenuItem.Checked = Configuration.Instance.NotifyWhenDone;
         }
 
+        internal string LoggedInUserEmail
+        {
+            get
+            {
+                return lblLoggedInUser.Text;
+            }
+        }
+
         private void HandleMainformShown(object sender, EventArgs e)
         {
             LogMethodEntry();
