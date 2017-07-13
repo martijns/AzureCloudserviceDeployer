@@ -1,4 +1,8 @@
-﻿2016-11-04:
+﻿2017-07-13:
+- CHG: Added location filter when cloudservices and storages are found in multiple different regions.
+- CHG: Changed the user name value from the local user to the the azure user.
+
+2016-11-04:
 - CHG: Presets were already saved in Json format, but is now indented to improve readability.
 - NEW: Add ability to clear the Most Recently Used list of presets
 - CHG: Added dummy menu item to make clear that the list of presets is a MRU list instead of all presets that are available. Presets are not saved in the application, but saved as file on the file system.
