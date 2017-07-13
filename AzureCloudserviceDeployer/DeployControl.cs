@@ -257,6 +257,9 @@ namespace AzureCloudserviceDeployer
             // Loop through the paths we received and add any files in subdirs
             foreach (var path in paths)
             {
+                if (path == null)
+                    continue;
+                
                 GetFilesRecursive(files, path);
             }
 
@@ -282,7 +285,7 @@ namespace AzureCloudserviceDeployer
         }
 
         private void UpdateSelectedFile(string path)
-        { 
+        {
             if (path.EndsWith(".cspkg", StringComparison.OrdinalIgnoreCase))
                 _selectedPackage = path;
             if (path.EndsWith(".cscfg", StringComparison.OrdinalIgnoreCase))
@@ -318,7 +321,15 @@ namespace AzureCloudserviceDeployer
             await HandleSubscriptionIndexChangedAsync(sender, e);
         }
 
-        private async Task HandleSubscriptionIndexChangedAsync(object sender, EventArgs e)
+        private async void cbLocations_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var cb = (ComboBox)sender;
+            var cbSelectedText = cb.SelectedItem as string;
+
+            await HandleSubscriptionIndexChangedAsync(sender, e, cbSelectedText);
+        }
+
+        private async Task HandleSubscriptionIndexChangedAsync(object sender, EventArgs e, string locationFilter = null)
         {
             LogMethodEntry();
             await PerformWorkAsync(null, async () =>
@@ -330,21 +341,53 @@ namespace AzureCloudserviceDeployer
                 // Clear currently selected files
                 ClearAllSelectedFiles();
 
-                // Load cloudservices
-                var hostedservices = await AzureHelper.GetCloudservicesAsync(_id, subscription);
+                // Load cloudservices and storageaccounts
+                var hostedservicesTask = AzureHelper.GetCloudservicesAsync(_id, subscription);
+                var storageaccountsTask = AzureHelper.GetStorageAccountsAsync(_id, subscription);
+                await Task.WhenAll(hostedservicesTask, storageaccountsTask);
+
+                // Update cloudservices
+                var hostedservices = hostedservicesTask.Result;
+
                 cbCloudservices.Items.Clear();
-                foreach (var service in hostedservices.OrderBy(s => s.ServiceName))
+                foreach (var hostedService in hostedservices.OrderBy(hostedService => hostedService.ServiceName))
                 {
-                    cbCloudservices.Items.Add(service);
+                    if (ShouldFilter(locationFilter, hostedService.Properties.Location, hostedService.Properties.ExtendedProperties))
+                        continue;
+
+                    cbCloudservices.Items.Add(hostedService);
                 }
                 cbCloudservices.ValueMember = "ServiceName";
 
-                // Load storageaccounts
-                var storageaccounts = await AzureHelper.GetStorageAccountsAsync(_id, subscription);
-                cbPackageStorage.Items.Clear();
-                foreach (var account in storageaccounts.OrderBy(s => s.Name))
+                if (locationFilter == null)
                 {
-                    cbPackageStorage.Items.Add(account);
+                    var locations = hostedservices.Select(hostedService => hostedService.Properties.Location).Where(location => location != null).Distinct().OrderBy(name => name).ToList();
+                    cbLocations.Items.Clear();
+                    if (locations.Count > 1)
+                    {
+                        cbLocations.Items.Add("<ALL>");
+                        foreach (var location in locations)
+                        {
+                            cbLocations.Items.Add(location);
+                        }
+                        cbLocations.SelectedIndex = 0;
+                        cbLocations.Show();
+                    }
+                    else
+                    {
+                        cbLocations.Hide();
+                    }
+                }
+
+                // Update storageaccounts
+                var storageaccounts = storageaccountsTask.Result;
+                cbPackageStorage.Items.Clear();
+                foreach (var storageAccount in storageaccounts.OrderBy(storageAccount => storageAccount.Name))
+                {
+                    if (ShouldFilter(locationFilter, storageAccount.Properties.Location, storageAccount.ExtendedProperties))
+                        continue;
+
+                    cbPackageStorage.Items.Add(storageAccount);
                 }
                 cbPackageStorage.ValueMember = "Name";
                 cbPackageStorage.SelectedIndex = 0;
@@ -377,6 +420,27 @@ namespace AzureCloudserviceDeployer
 
                 UpdateFormState();
             });
+        }
+
+        private static bool ShouldFilter(string locationFilter, string location, IDictionary<string, string> extendedProperties)
+        {
+            if (locationFilter == null || locationFilter == "<ALL>")
+                return false;
+
+            if (location != null)
+                return !location.Equals(locationFilter);
+
+            if (extendedProperties["ResourceLocation"] != null)
+            {
+                var resourceLocation = extendedProperties["ResourceLocation"].ToLowerInvariant().Replace(" ", string.Empty);
+                var filter = locationFilter.ToLowerInvariant().Replace(" ", string.Empty);
+                if (resourceLocation.Equals(filter))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private async void HandleDownloadPackageClicked(object sender, EventArgs e)
